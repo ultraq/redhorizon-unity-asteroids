@@ -3,11 +3,10 @@ name: build
 on: [push, pull_request]
 jobs:
   build:
-#    strategy:
-#      matrix:
-#        os: [macos-latest, windows-latest]
-#    runs-on: ${{ matrix.os }}
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: gradle/actions/wrapper-validation@v4
