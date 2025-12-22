@@ -16,9 +16,10 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.input.InputEventHandler
-import static nz.net.ultraq.asteroids.ScopedValues.getINPUT_EVENT_HANDLER
+import static nz.net.ultraq.asteroids.ScopedValues.INPUT_EVENT_HANDLER
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -31,25 +32,43 @@ import static org.lwjgl.glfw.GLFW.*
  */
 class PlayerScript extends EntityScript {
 
+	static final float thrustSpeed = 100f
+	static final float turnSpeed = 1f
 	private static final Logger logger = LoggerFactory.getLogger(PlayerScript)
 
-	private InputEventHandler inputEventHandler
+	private final InputEventHandler input
+	private SpriteComponent sprite
+	private boolean thrusting
 	private float turnDirection
+
+	/**
+	 * Constructor, set the player script up with the scoped values.
+	 */
+	PlayerScript() {
+
+		input = INPUT_EVENT_HANDLER.get()
+	}
 
 	@Override
 	void init() {
 
-		inputEventHandler = INPUT_EVENT_HANDLER.get()
+		sprite = entity.findComponent { it instanceof SpriteComponent } as SpriteComponent
 	}
 
 	@Override
 	void update(float delta) {
 
-		if (inputEventHandler.keyPressed(GLFW_KEY_LEFT)) {
-			turnDirection -= 1f
+		thrusting = input.keyPressed(GLFW_KEY_W) || input.keyPressed(GLFW_KEY_UP)
+		turnDirection =
+			input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT) ? 1f :
+			input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT) ? -1f :
+			0f
+
+		if (thrusting) {
+			entity.transform.translate(0f, thrustSpeed * delta as float, 0f)
 		}
-		if (inputEventHandler.keyPressed(GLFW_KEY_RIGHT)) {
-			turnDirection += 1f
+		if (turnDirection != 0f) {
+			entity.transform.rotateZ(turnDirection * turnSpeed * delta as float)
 		}
 	}
 }
