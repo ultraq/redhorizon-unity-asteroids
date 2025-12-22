@@ -19,12 +19,16 @@ package nz.net.ultraq.asteroids
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
+import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.*
+
+import org.joml.primitives.Rectanglef
 
 /**
  * Scene setup for the Asteroids game.
@@ -48,6 +52,8 @@ class AsteroidsScene extends Scene {
 		addChild(camera)
 
 		shader = new BasicShader()
+
+		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, 1920f, 1080f).center(), 64f, Colour.RED, Colour.GREY))
 
 		var playerImage = resourceManager.loadImage('Player.png')
 		addChild(new Entity()
