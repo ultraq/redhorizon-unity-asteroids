@@ -16,9 +16,17 @@
 
 package nz.net.ultraq.asteroids
 
-import nz.net.ultraq.redhorizon.graphics.Camera
+import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
+import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
+import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
+import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
+
+import com.google.inject.Injector
 
 /**
  * Scene setup for the Asteroids game.
@@ -27,15 +35,63 @@ import nz.net.ultraq.redhorizon.scenegraph.Scene
  */
 class AsteroidsScene extends Scene {
 
-	final Camera camera
+	final CameraEntity camera
+	private final BasicShader shader
 
 	/**
 	 * Constructor, create a new scene to the given dimensions.
 	 */
-	AsteroidsScene(int width, int height, Window window) {
+	AsteroidsScene(int width, int height, Injector injector) {
 
-		camera = new Camera(width, height, window)
-
+		camera = new CameraEntity(width, height, injector.getInstance(Window))
 		addChild(camera)
+
+		shader = new BasicShader()
+
+		var resourceManager = injector.getInstance(ResourceManager)
+
+		var playerImage = resourceManager.loadImage('Player.png')
+		addChild(new Entity()
+			.addComponent(new SpriteComponent(playerImage, BasicShader)
+				.translate(-playerImage.width / 2 as float, -playerImage.height / 2 as float, 0f))
+			.withName('Player'))
+	}
+
+	/**
+	 * Draw out all the graphical components of the scene.
+	 */
+	void render() {
+
+		var graphicsComponents = new ArrayList<GraphicsComponent>()
+		traverse { node ->
+			if (node instanceof Entity) {
+				// TODO: Create an allocation-free method of finding components
+				graphicsComponents.addAll(node.findComponents { it instanceof GraphicsComponent })
+			}
+		}
+
+		shader.useShader { shaderContext ->
+			camera.render(shaderContext)
+			graphicsComponents.each { component ->
+				component.render(shaderContext)
+			}
+		}
+	}
+
+	/**
+	 * Perform a scene update in the game loop.
+	 */
+	void update(float delta) {
+
+		// TODO: Similar to above, these look like they should be the "S" part of ECS
+		var gameLogicComponents = new ArrayList<GameLogicComponent>()
+		traverse { node ->
+			if (node instanceof Entity) {
+				gameLogicComponents.addAll(node.findComponents { it instanceof GameLogicComponent })
+			}
+		}
+		gameLogicComponents.each { component ->
+			component.update(delta)
+		}
 	}
 }
