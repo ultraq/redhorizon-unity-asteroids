@@ -18,48 +18,18 @@ package nz.net.ultraq.asteroids
 
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 
-import com.google.inject.AbstractModule
-import com.google.inject.Provides
-import jakarta.inject.Singleton
-
 /**
- * Guice injection module for the Asteroids game.
+ * Keys for objects being shared using Java's Scoped Values.
  *
  * @author Emanuel Rabina
  */
-class AsteroidsModule extends AbstractModule {
+class ScopedValues {
 
-	@Provides
-	@Singleton
-	InputEventHandler inputEventHandler(Window window) {
-		return new InputEventHandler()
-			.addInputSource(window)
-	}
-
-	@Provides
-	@Singleton
-	ResourceManager resourceManager() {
-		return new ResourceManager('nz/net/ultraq/asteroids/assets/')
-	}
-
-	@Provides
-	@Singleton
-	ScriptEngine scriptEngine() {
-		return new ScriptEngine('.')
-	}
-
-	@Provides
-	@Singleton
-	Window window() {
-		return new OpenGLWindow(1920, 1080, 'Asteroids')
-			.centerToScreen()
-			.scaleToFit()
-			.withBackgroundColour(Colour.BLACK)
-			.withVSync(true)
-	}
+	static final ScopedValue<Window> WINDOW = ScopedValue.newInstance()
+	static final ScopedValue<InputEventHandler> INPUT_EVENT_HANDLER = ScopedValue.newInstance()
+	static final ScopedValue<ResourceManager> RESOURCE_MANAGER = ScopedValue.newInstance()
+	static final ScopedValue<ScriptEngine> SCRIPT_ENGINE = ScopedValue.newInstance()
 }

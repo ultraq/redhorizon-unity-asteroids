@@ -16,14 +16,17 @@
 
 package nz.net.ultraq.asteroids
 
-import nz.net.ultraq.asteroids.inject.CloseableInjector
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
+import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
-import com.google.inject.Guice
 import picocli.CommandLine
 import picocli.CommandLine.Command
 import static org.lwjgl.glfw.GLFW.*
@@ -44,46 +47,70 @@ class Asteroids implements Runnable {
 		System.exit(new CommandLine(new Asteroids()).execute(args))
 	}
 
+	private Window window
+	private InputEventHandler inputEventHandler
+	private ResourceManager resourceManager
+	private ScriptEngine scriptEngine
+
 	@Override
 	void run() {
 
-		new CloseableInjector(Guice.createInjector(new AsteroidsModule())).withCloseable { injector ->
+		try {
+			// Init devices
+			window = new OpenGLWindow(1920, 1080, 'Asteroids')
+				.centerToScreen()
+				.scaleToFit()
+				.withBackgroundColour(Colour.BLACK)
+				.withVSync(true)
+			inputEventHandler = new InputEventHandler()
+				.addInputSource(window)
+			resourceManager = new ResourceManager('nz/net/ultraq/asteroids/assets/')
+			scriptEngine = new ScriptEngine('.')
 
-			// Init scene
-			var scene = new AsteroidsScene(1920, 1080, injector)
+			ScopedValue
+				.where(WINDOW, window)
+				.where(INPUT_EVENT_HANDLER, inputEventHandler)
+				.where(RESOURCE_MANAGER, resourceManager)
+				.where(SCRIPT_ENGINE, scriptEngine)
+				.run(() -> {
 
-			var window = injector.getInstance(Window)
-			window
-				.addImGuiComponent(new DebugOverlay()
-					.withCursorTracking(scene.camera.camera, scene.camera.transform))
-				.addImGuiComponent(new NodeList(scene))
-				.show()
-			var inputEventHandler = injector.getInstance(InputEventHandler)
+					// Init scene
+					var scene = new AsteroidsScene()
+					window
+						.addImGuiComponent(new DebugOverlay()
+							.withCursorTracking(scene.camera.camera, scene.camera.transform))
+						.addImGuiComponent(new NodeList(scene))
+						.show()
 
-			// Game loop
-			var deltaTimer = new DeltaTimer()
-			while (!window.shouldClose()) {
-				var delta = deltaTimer.deltaTime()
+					// Game loop
+					var deltaTimer = new DeltaTimer()
+					while (!window.shouldClose()) {
+						var delta = deltaTimer.deltaTime()
 
-				// Logic/update
-				if (inputEventHandler.keyPressed(GLFW_KEY_ESCAPE, true)) {
-					window.shouldClose(true)
-				}
-				if (inputEventHandler.keyPressed(GLFW_KEY_I, true)) {
-					window.toggleImGuiWindows()
-				}
-				if (inputEventHandler.keyPressed(GLFW_KEY_V, true)) {
-					window.toggleVSync()
-				}
-				scene.update(delta)
+						// Logic/update
+						if (inputEventHandler.keyPressed(GLFW_KEY_ESCAPE, true)) {
+							window.shouldClose(true)
+						}
+						if (inputEventHandler.keyPressed(GLFW_KEY_I, true)) {
+							window.toggleImGuiWindows()
+						}
+						if (inputEventHandler.keyPressed(GLFW_KEY_V, true)) {
+							window.toggleVSync()
+						}
+						scene.update(delta)
 
-				// Render
-				window.useWindow { ->
-					scene.render()
-				}
+						// Render
+						window.useWindow { ->
+							scene.render()
+						}
 
-				Thread.yield()
-			}
+						Thread.yield()
+					}
+				})
+		}
+		finally {
+			resourceManager?.close()
+			window?.close()
 		}
 	}
 }

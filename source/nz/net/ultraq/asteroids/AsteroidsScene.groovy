@@ -21,12 +21,10 @@ import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
-import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-
-import com.google.inject.Injector
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 /**
  * Scene setup for the Asteroids game.
@@ -41,19 +39,21 @@ class AsteroidsScene extends Scene {
 	/**
 	 * Constructor, create a new scene to the given dimensions.
 	 */
-	AsteroidsScene(int width, int height, Injector injector) {
+	AsteroidsScene() {
 
-		camera = new CameraEntity(width, height, injector.getInstance(Window))
+		var window = WINDOW.get()
+		var resourceManager = RESOURCE_MANAGER.get()
+
+		camera = new CameraEntity(1920, 1080, window)
 		addChild(camera)
 
 		shader = new BasicShader()
-
-		var resourceManager = injector.getInstance(ResourceManager)
 
 		var playerImage = resourceManager.loadImage('Player.png')
 		addChild(new Entity()
 			.addComponent(new SpriteComponent(playerImage, BasicShader)
 				.translate(-playerImage.width / 2 as float, -playerImage.height / 2 as float, 0f))
+			.addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), 'PlayerScript.groovy'))
 			.withName('Player'))
 	}
 
