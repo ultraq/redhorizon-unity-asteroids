@@ -35,7 +35,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class AsteroidsScene extends Scene {
+class AsteroidsScene extends Scene implements AutoCloseable {
 
 	final CameraEntity camera
 	private final BasicShader shader
@@ -61,6 +61,16 @@ class AsteroidsScene extends Scene {
 				.translate(-playerImage.width / 2 as float, -playerImage.height / 2 as float, 0f))
 			.addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), 'PlayerScript.groovy'))
 			.withName('Player'))
+	}
+
+	@Override
+	void close() {
+
+		traverse { node ->
+			if (node instanceof AutoCloseable) {
+				node.close()
+			}
+		}
 	}
 
 	/**

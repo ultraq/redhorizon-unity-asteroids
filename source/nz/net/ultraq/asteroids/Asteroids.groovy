@@ -51,13 +51,14 @@ class Asteroids implements Runnable {
 	private InputEventHandler inputEventHandler
 	private ResourceManager resourceManager
 	private ScriptEngine scriptEngine
+	private AsteroidsScene scene
 
 	@Override
 	void run() {
 
 		try {
 			// Init devices
-			window = new OpenGLWindow(1920, 1080, 'Asteroids')
+			window = new OpenGLWindow(800, 450, 'Asteroids')
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(Colour.BLACK)
@@ -75,7 +76,7 @@ class Asteroids implements Runnable {
 				.run(() -> {
 
 					// Init scene
-					var scene = new AsteroidsScene()
+					scene = new AsteroidsScene()
 					window
 						.addImGuiComponent(new DebugOverlay()
 							.withCursorTracking(scene.camera.camera, scene.camera.transform))
@@ -109,6 +110,7 @@ class Asteroids implements Runnable {
 				})
 		}
 		finally {
+			scene?.close()
 			resourceManager?.close()
 			window?.close()
 		}
