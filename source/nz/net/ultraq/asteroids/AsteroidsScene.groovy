@@ -37,8 +37,8 @@ import org.joml.primitives.Rectanglef
  */
 class AsteroidsScene extends Scene implements AutoCloseable {
 
-	static final int WIDTH = 1280
-	static final int HEIGHT = 720
+	static final int WIDTH = 1920
+	static final int HEIGHT = 1080
 
 	final CameraEntity camera
 	private final BasicShader shader

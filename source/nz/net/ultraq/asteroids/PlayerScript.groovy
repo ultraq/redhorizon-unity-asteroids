@@ -37,9 +37,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_W
 class PlayerScript extends EntityScript {
 
 	static final float maxThrustSpeed = 400f
-	static final float maxTurnSpeed = 2f
 	static final float linearDrag = 0.5f
-	static final float timeToMaxSpeed = 1f
 	private static final Logger logger = LoggerFactory.getLogger(PlayerScript)
 	private static final Vector2f up = new Vector2f(0f, 1f)
 
