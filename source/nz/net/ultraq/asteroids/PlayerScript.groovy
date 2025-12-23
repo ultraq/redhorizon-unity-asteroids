@@ -21,6 +21,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.INPUT_EVENT_HANDLER
 
+import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
@@ -32,14 +33,19 @@ import static org.lwjgl.glfw.GLFW.*
  */
 class PlayerScript extends EntityScript {
 
-	static final float thrustSpeed = 100f
-	static final float turnSpeed = 1f
+	static final float maxThrustSpeed = 10f
+	static final float maxTurnSpeed = 2f
+	static final float linearDrag = 0.5f
 	private static final Logger logger = LoggerFactory.getLogger(PlayerScript)
+	private static final Vector2f up = new Vector2f(0f, 1f)
 
 	private final InputEventHandler input
 	private SpriteComponent sprite
-	private boolean thrusting
-	private float turnDirection
+	private float heading = 0f
+	private Vector2f impulse = new Vector2f()
+	private float velocity = 0f
+	private boolean thrusting = false
+	private float turnDirection = 0f
 
 	/**
 	 * Constructor, set the player script up with the scoped values.
@@ -64,11 +70,13 @@ class PlayerScript extends EntityScript {
 			input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT) ? -1f :
 			0f
 
-		if (thrusting) {
-			entity.transform.translate(0f, thrustSpeed * delta as float, 0f)
-		}
+		// Apply thrust as acceleration
+		velocity = velocity + ((thrusting ? maxThrustSpeed : 0) - velocity) * linearDrag * delta as float
+		entity.transform.translate(0f, velocity, 0f)
+
+		// Turn around the axis of the ship
 		if (turnDirection != 0f) {
-			entity.transform.rotateZ(turnDirection * turnSpeed * delta as float)
+			entity.transform.rotateZ(turnDirection * maxTurnSpeed * delta as float)
 		}
 	}
 }
