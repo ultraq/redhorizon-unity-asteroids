@@ -37,6 +37,9 @@ import org.joml.primitives.Rectanglef
  */
 class AsteroidsScene extends Scene implements AutoCloseable {
 
+	static final int WIDTH = 1280
+	static final int HEIGHT = 720
+
 	final CameraEntity camera
 	private final BasicShader shader
 
@@ -48,12 +51,12 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		var window = WINDOW.get()
 		var resourceManager = RESOURCE_MANAGER.get()
 
-		camera = new CameraEntity(1920, 1080, window)
+		camera = new CameraEntity(WIDTH, HEIGHT, window)
 		addChild(camera)
 
 		shader = new BasicShader()
 
-		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, 1920f, 1080f).center(), 64f, Colour.RED, Colour.GREY))
+		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, WIDTH, HEIGHT).center(), 64f, Colour.RED, Colour.GREY))
 
 		var playerImage = resourceManager.loadImage('Player.png')
 		addChild(new Entity()

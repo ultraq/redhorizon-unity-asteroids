@@ -58,7 +58,7 @@ class Asteroids implements Runnable {
 
 		try {
 			// Init devices
-			window = new OpenGLWindow(800, 450, 'Asteroids')
+			window = new OpenGLWindow(1280, 720, 'Asteroids')
 				.centerToScreen()
 				.scaleToFit()
 				.withBackgroundColour(Colour.BLACK)

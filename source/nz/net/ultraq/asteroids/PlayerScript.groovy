@@ -16,15 +16,18 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.INPUT_EVENT_HANDLER
 
 import org.joml.Vector2f
+import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.*
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W
 
 /**
  * Player movement and behaviour script.
@@ -33,19 +36,29 @@ import static org.lwjgl.glfw.GLFW.*
  */
 class PlayerScript extends EntityScript {
 
-	static final float maxThrustSpeed = 10f
+	static final float maxThrustSpeed = 400f
 	static final float maxTurnSpeed = 2f
 	static final float linearDrag = 0.5f
+	static final float timeToMaxSpeed = 1f
 	private static final Logger logger = LoggerFactory.getLogger(PlayerScript)
 	private static final Vector2f up = new Vector2f(0f, 1f)
 
 	private final InputEventHandler input
 	private SpriteComponent sprite
+	private CameraEntity camera
+	private Vector2f worldBoundsMin
+	private Vector2f worldBoundsMax
+
+	// Movement and rotation
+	private Vector2f positionXY = new Vector2f()
+	private Vector2f worldCursorPosition = new Vector2f()
+	private Vector3f unprojectResult = new Vector3f()
+	private Vector2f headingToCursor = new Vector2f()
 	private float heading = 0f
 	private Vector2f impulse = new Vector2f()
-	private float velocity = 0f
-	private boolean thrusting = false
-	private float turnDirection = 0f
+	private boolean accelerating = false
+	private Vector2f velocity = new Vector2f()
+	private Vector2f updatedPosition = new Vector2f()
 
 	/**
 	 * Constructor, set the player script up with the scoped values.
@@ -58,25 +71,52 @@ class PlayerScript extends EntityScript {
 	@Override
 	void init() {
 
+		var scene = (AsteroidsScene)entity.scene
 		sprite = entity.findComponent { it instanceof SpriteComponent } as SpriteComponent
+		camera = scene.camera
+		var worldBounds = new Rectanglef().setMax(scene.WIDTH, scene.HEIGHT).center()
+		worldBoundsMin = worldBounds.getMin(new Vector2f())
+		worldBoundsMax = worldBounds.getMax(new Vector2f())
 	}
 
 	@Override
 	void update(float delta) {
 
-		thrusting = input.keyPressed(GLFW_KEY_W) || input.keyPressed(GLFW_KEY_UP)
-		turnDirection =
-			input.keyPressed(GLFW_KEY_A) || input.keyPressed(GLFW_KEY_LEFT) ? 1f :
-			input.keyPressed(GLFW_KEY_D) || input.keyPressed(GLFW_KEY_RIGHT) ? -1f :
-			0f
+		// Update sprite to look at the cursor
+		var cursorPosition = input.cursorPosition()
+		if (cursorPosition) {
+			positionXY.set(entity.position)
+			worldCursorPosition.set(camera.unproject(cursorPosition.x(), cursorPosition.y(), unprojectResult))
+			worldCursorPosition.sub(positionXY, headingToCursor)
+			heading = headingToCursor.angle(up)
+			entity.transform.setRotationXYZ(0f, 0f, -heading)
+		}
 
-		// Apply thrust as acceleration
-		velocity = velocity + ((thrusting ? maxThrustSpeed : 0) - velocity) * linearDrag * delta as float
-		entity.transform.translate(0f, velocity, 0f)
+		// Set the direction of the movement force based on inputs
+		var impulseDirection = 0f
+		if (input.keyPressed(GLFW_KEY_W)) {
+			impulseDirection = heading
+			accelerating = true
+		}
+		else {
+			accelerating = false
+		}
 
-		// Turn around the axis of the ship
-		if (turnDirection != 0f) {
-			entity.transform.rotateZ(turnDirection * maxTurnSpeed * delta as float)
+		// Adjust the strength of the force based on acceleration time
+		if (accelerating) {
+			impulse.set(Math.sin(impulseDirection), Math.cos(impulseDirection)).normalize().mul(maxThrustSpeed).mul(delta)
+		}
+		else {
+			impulse.set(0f, 0f)
+		}
+
+		// Calculate the velocity from the above
+		velocity.lerp(impulse, linearDrag * delta as float)
+
+		// Adjust position based on velocity
+		if (velocity) {
+			updatedPosition.set(entity.position).add(velocity).min(worldBoundsMax).max(worldBoundsMin)
+			entity.setPosition(updatedPosition.x(), updatedPosition.y(), 0)
 		}
 	}
 }
