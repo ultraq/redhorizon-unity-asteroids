@@ -27,7 +27,7 @@ import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import static org.lwjgl.glfw.GLFW.GLFW_KEY_W
+import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Player movement and behaviour script.
@@ -36,8 +36,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_W
  */
 class PlayerScript extends EntityScript {
 
-	static final float maxThrustSpeed = 400f
-	static final float linearDrag = 0.5f
+	static final float maxThrustSpeed = 500f
+	static final float linearDrag = 1f
 	private static final Logger logger = LoggerFactory.getLogger(PlayerScript)
 	private static final Vector2f up = new Vector2f(0f, 1f)
 
@@ -57,6 +57,9 @@ class PlayerScript extends EntityScript {
 	private boolean accelerating = false
 	private Vector2f velocity = new Vector2f()
 	private Vector2f updatedPosition = new Vector2f()
+
+	// Shooting
+	private float firingCooldown
 
 	/**
 	 * Constructor, set the player script up with the scoped values.
@@ -80,6 +83,16 @@ class PlayerScript extends EntityScript {
 	@Override
 	void update(float delta) {
 
+		updateHeading(delta)
+		updateMovement(delta)
+		updateShooting(delta)
+	}
+
+	/**
+	 * Keep the player pointed at the cursor.
+	 */
+	private void updateHeading(float delta) {
+
 		// Update sprite to look at the cursor
 		var cursorPosition = input.cursorPosition()
 		if (cursorPosition) {
@@ -89,6 +102,12 @@ class PlayerScript extends EntityScript {
 			heading = headingToCursor.angle(up)
 			entity.transform.setRotationXYZ(0f, 0f, -heading)
 		}
+	}
+
+	/**
+	 * Keep moving based on acceleration applied.
+	 */
+	private void updateMovement(float delta) {
 
 		// Set the direction of the movement force based on inputs
 		var impulseDirection = 0f
@@ -115,6 +134,20 @@ class PlayerScript extends EntityScript {
 		if (velocity) {
 			updatedPosition.set(entity.position).add(velocity).min(worldBoundsMax).max(worldBoundsMin)
 			entity.setPosition(updatedPosition.x(), updatedPosition.y(), 0)
+		}
+	}
+
+	/**
+	 * Fire bullets if player is pressing the fire button.
+	 */
+	private void updateShooting(float delta) {
+
+		firingCooldown -= delta
+
+		if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
+//			(entity.scene as AsteroidsScene).queueCreation(new Bullet(entity.transform))
+			entity.scene.addChild(new Bullet(entity.transform))
+			firingCooldown = 0.5f
 		}
 	}
 }

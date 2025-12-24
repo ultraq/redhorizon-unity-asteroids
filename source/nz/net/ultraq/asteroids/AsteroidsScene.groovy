@@ -20,13 +20,11 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
 
 import org.joml.primitives.Rectanglef
 
@@ -49,21 +47,13 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	AsteroidsScene() {
 
 		var window = WINDOW.get()
-		var resourceManager = RESOURCE_MANAGER.get()
 
 		camera = new CameraEntity(WIDTH, HEIGHT, window)
-		addChild(camera)
-
 		shader = new BasicShader()
 
+		addChild(camera)
 		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, WIDTH, HEIGHT).center(), 64f, Colour.RED, Colour.GREY))
-
-		var playerImage = resourceManager.loadImage('Player.png')
-		addChild(new Entity()
-			.addComponent(new SpriteComponent(playerImage, BasicShader)
-				.translate(-playerImage.width / 2 as float, -playerImage.height / 2 as float, 0f))
-			.addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), 'PlayerScript.groovy'))
-			.withName('Player'))
+		addChild(new Player())
 	}
 
 	@Override
@@ -84,8 +74,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		var graphicsComponents = new ArrayList<GraphicsComponent>()
 		traverse { node ->
 			if (node instanceof Entity) {
-				// TODO: Create an allocation-free method of finding components
-				graphicsComponents.addAll(node.findComponents { it instanceof GraphicsComponent })
+				node.findComponentsByType(GraphicsComponent, graphicsComponents)
 			}
 		}
 
@@ -106,7 +95,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		var gameLogicComponents = new ArrayList<GameLogicComponent>()
 		traverse { node ->
 			if (node instanceof Entity) {
-				gameLogicComponents.addAll(node.findComponents { it instanceof GameLogicComponent })
+				node.findComponentsByType(GameLogicComponent, gameLogicComponents)
 			}
 		}
 		gameLogicComponents.each { component ->
