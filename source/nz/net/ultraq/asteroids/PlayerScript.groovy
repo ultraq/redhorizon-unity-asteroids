@@ -148,7 +148,7 @@ class PlayerScript extends EntityScript {
 			(entity.scene as AsteroidsScene).queueChange { ->
 				entity.scene.addChild(new Bullet(entity.transform, velocity))
 			}
-			firingCooldown = 0.5f
+			firingCooldown = 0.25f
 		}
 	}
 }

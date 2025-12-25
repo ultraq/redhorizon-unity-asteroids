@@ -55,8 +55,10 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		shader = new BasicShader()
 
 		addChild(camera)
-		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, WIDTH, HEIGHT).center(), 64f, Colour.RED, Colour.GREY))
+		addChild(new GridLinesEntity(new Rectanglef(0f, 0f, WIDTH, HEIGHT).center(), 64f, Colour.RED, Colour.GREY)
+			.withName('Grid lines'))
 		addChild(new Player())
+		addChild(new AsteroidSpawner())
 	}
 
 	@Override

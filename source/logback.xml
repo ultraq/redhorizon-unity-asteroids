@@ -22,6 +22,7 @@
 		</encoder>
 	</appender>
 	<logger name="nz.net.ultraq" level="DEBUG"/>
+	<logger name="nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine" level="INFO"/>
 	<root level="INFO">
 		<appender-ref ref="console"/>
 	</root>
