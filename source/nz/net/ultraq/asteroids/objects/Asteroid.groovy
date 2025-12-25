@@ -14,13 +14,14 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.asteroids
+package nz.net.ultraq.asteroids.objects
 
+import nz.net.ultraq.asteroids.ScopedValues
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Vector2fc
 
@@ -30,6 +31,8 @@ import org.joml.Vector2fc
  * @author Emanuel Rabina
  */
 class Asteroid extends Entity<Asteroid> {
+
+	static final float baseSpeed = 100f
 
 	/**
 	 * The sizes of asteroid available.
@@ -47,8 +50,8 @@ class Asteroid extends Entity<Asteroid> {
 	 */
 	Asteroid(Size size, Vector2fc initialPosition, float rotation) {
 
-		var resourceManager = RESOURCE_MANAGER.get()
-		var scriptEngine = SCRIPT_ENGINE.get()
+		var resourceManager = ScopedValues.RESOURCE_MANAGER.get()
+		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
 
 		this.size = size
 
@@ -59,8 +62,21 @@ class Asteroid extends Entity<Asteroid> {
 
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
 		addComponent(new SpriteComponent(asteroidImage, BasicShader)
-			.translate(-asteroidImage.width / 2 as float, -asteroidImage.height / 2 as float, 0f))
-//			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
-		addComponent(new ScriptComponent(scriptEngine, 'AsteroidScript'))
+			.translate(-asteroidImage.width / 2 as float, -asteroidImage.height / 2 as float, 0f)
+			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
+		addComponent(new ScriptComponent(scriptEngine, AsteroidScript))
+	}
+
+	/**
+	 * Asteroid movement and behaviour.
+	 */
+	static class AsteroidScript extends EntityScript<Asteroid> {
+
+		@Override
+		void update(float delta) {
+
+			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 1.5f : 2f)
+			entity.transform.translate(0f, speed * delta as float, 0f)
+		}
 	}
 }

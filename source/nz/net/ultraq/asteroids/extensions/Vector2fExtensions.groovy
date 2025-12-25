@@ -14,26 +14,24 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.asteroids
+package nz.net.ultraq.asteroids.extensions
 
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
+import org.joml.Vector2f
 
 /**
- * Game object responsible for creating asteroids.
+ * Extensions to JOML's {@link Vector2f} class.
  *
  * @author Emanuel Rabina
  */
-class AsteroidSpawner extends Entity<AsteroidSpawner> {
+class Vector2fExtensions {
+
+	private static final Vector2f UP = new Vector2f(0f, 1f)
 
 	/**
-	 * Constructor, create a new asteroid spawner.
+	 * Return a reusable vector for the 'up' direction in this game.
 	 */
-	AsteroidSpawner() {
+	static Vector2f getUP(Vector2f self) {
 
-		var scriptEngine = SCRIPT_ENGINE.get()
-
-		addComponent(new ScriptComponent(scriptEngine, 'AsteroidSpawnerScript'))
+		return UP
 	}
 }

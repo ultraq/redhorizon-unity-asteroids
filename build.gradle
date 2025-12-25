@@ -44,6 +44,7 @@ configure {
 				implementation 'org.joml:joml:1.10.8'
 				implementation 'org.joml:joml-primitives:1.10.0'
 			}
+			.expandExtensionModuleVersion()
 }
 
 configurations.configureEach {

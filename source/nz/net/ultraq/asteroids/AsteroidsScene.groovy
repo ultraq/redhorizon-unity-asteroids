@@ -16,6 +16,8 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.asteroids.objects.AsteroidSpawner
+import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
@@ -36,7 +38,7 @@ import org.joml.primitives.Rectanglef
 class AsteroidsScene extends Scene implements AutoCloseable {
 
 	static final int WIDTH = 1920
-	static final int HEIGHT = 1080
+	static final int HEIGHT = 1440
 
 	final CameraEntity camera
 	private final BasicShader shader

@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.asteroids
+package nz.net.ultraq.asteroids.objects
 
+import nz.net.ultraq.asteroids.AsteroidsScene
+import nz.net.ultraq.asteroids.ScopedValues
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
@@ -34,6 +36,8 @@ import java.util.concurrent.atomic.AtomicInteger
  */
 class Bullet extends Entity<Bullet> {
 
+	static final float bulletSpeed = 800f
+	static final float bulletLifetime = 1.2f
 	private static final AtomicInteger count = new AtomicInteger(1)
 
 	final Vector2fc initialVelocity
@@ -43,17 +47,44 @@ class Bullet extends Entity<Bullet> {
 	 */
 	Bullet(Matrix4fc initialTransform, Vector2fc initialVelocity) {
 
+		var resourceManager = ScopedValues.RESOURCE_MANAGER.get()
+		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
+
 		transform.set(initialTransform).translate(0f, 32f, 0f) // Start slightly ahead of the object
 		this.initialVelocity = initialVelocity // Include ship velocity for moving bullets
-
-		var resourceManager = RESOURCE_MANAGER.get()
-		var scriptEngine = SCRIPT_ENGINE.get()
 
 		var bulletImage = resourceManager.loadImage('Square.png')
 		addComponent(new SpriteComponent(bulletImage, BasicShader)
 			.translate(-bulletImage.width / 2 as float, -bulletImage.height / 2 as float, 0f))
-		addComponent(new ScriptComponent(scriptEngine, 'BulletScript'))
+		addComponent(new ScriptComponent(scriptEngine, BulletScript))
 
 		withName("Bullet ${count.getAndIncrement()}")
+	}
+
+	/**
+	 * Bullet behaviour script.
+	 */
+	static class BulletScript extends EntityScript<Bullet> {
+
+		private float bulletTimer
+
+		@Override
+		void update(float delta) {
+
+			bulletTimer += delta
+
+			// Destroy bullet if it reaches the max lifetime
+			if (bulletTimer > bulletLifetime) {
+				(entity.scene as AsteroidsScene).queueChange { ->
+					entity.scene.removeChild(entity)
+					entity.close()
+				}
+			}
+
+			// Keep moving along
+			else {
+				entity.translate(0f, (bulletSpeed + entity.initialVelocity.length()) * delta as float, 0f)
+			}
+		}
 	}
 }
