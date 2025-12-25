@@ -26,7 +26,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
+import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
 
 import org.joml.primitives.Rectanglef
 

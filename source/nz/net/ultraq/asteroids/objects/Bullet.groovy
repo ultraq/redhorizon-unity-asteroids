@@ -17,12 +17,12 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.ScopedValues
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
@@ -47,8 +47,8 @@ class Bullet extends Entity<Bullet> {
 	 */
 	Bullet(Matrix4fc initialTransform, Vector2fc initialVelocity) {
 
-		var resourceManager = ScopedValues.RESOURCE_MANAGER.get()
-		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
+		var resourceManager = RESOURCE_MANAGER.get()
+		var scriptEngine = SCRIPT_ENGINE.get()
 
 		transform.set(initialTransform).translate(0f, 32f, 0f) // Start slightly ahead of the object
 		this.initialVelocity = initialVelocity // Include ship velocity for moving bullets

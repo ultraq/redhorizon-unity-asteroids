@@ -25,6 +25,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -48,8 +49,8 @@ class Player extends Entity<Player> {
 	 */
 	Player() {
 
-		var resourceManager = ScopedValues.RESOURCE_MANAGER.get()
-		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
+		var resourceManager = RESOURCE_MANAGER.get()
+		var scriptEngine = SCRIPT_ENGINE.get()
 
 		var playerImage = resourceManager.loadImage('Player.png')
 		addComponent(new SpriteComponent(playerImage, BasicShader)

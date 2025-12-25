@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.asteroids.ScopedValues
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Vector2fc
 
@@ -50,8 +50,8 @@ class Asteroid extends Entity<Asteroid> {
 	 */
 	Asteroid(Size size, Vector2fc initialPosition, float rotation) {
 
-		var resourceManager = ScopedValues.RESOURCE_MANAGER.get()
-		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
+		var resourceManager = RESOURCE_MANAGER.get()
+		var scriptEngine = SCRIPT_ENGINE.get()
 
 		this.size = size
 

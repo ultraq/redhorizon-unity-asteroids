@@ -17,11 +17,11 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.ScopedValues
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
 
 import org.joml.Vector2f
 
@@ -37,7 +37,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 	 */
 	AsteroidSpawner() {
 
-		var scriptEngine = ScopedValues.SCRIPT_ENGINE.get()
+		var scriptEngine = SCRIPT_ENGINE.get()
 
 		addComponent(new ScriptComponent(scriptEngine, AsteroidSpawnerScript))
 	}
@@ -56,6 +56,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 
 		@Override
 		void init() {
+
 			scene = (AsteroidsScene)entity.scene
 		}
 
