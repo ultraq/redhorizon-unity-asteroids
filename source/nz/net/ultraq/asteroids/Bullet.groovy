@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Matrix4fc
+import org.joml.Vector2fc
 
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -35,12 +36,15 @@ class Bullet extends Entity<Bullet> {
 
 	private static final AtomicInteger count = new AtomicInteger(1)
 
+	final Vector2fc initialVelocity
+
 	/**
 	 * Constructor, set up the bullet entity.
 	 */
-	Bullet(Matrix4fc initialTransform) {
+	Bullet(Matrix4fc initialTransform, Vector2fc initialVelocity) {
 
 		transform.set(initialTransform).translate(0f, 32f, 0f) // Start slightly ahead of the object
+		this.initialVelocity = initialVelocity // Include ship velocity for moving bullets
 
 		var resourceManager = RESOURCE_MANAGER.get()
 		var scriptEngine = SCRIPT_ENGINE.get()

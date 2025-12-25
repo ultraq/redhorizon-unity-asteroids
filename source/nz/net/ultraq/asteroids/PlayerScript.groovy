@@ -145,8 +145,9 @@ class PlayerScript extends EntityScript {
 		firingCooldown -= delta
 
 		if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
-//			(entity.scene as AsteroidsScene).queueCreation(new Bullet(entity.transform))
-			entity.scene.addChild(new Bullet(entity.transform))
+			(entity.scene as AsteroidsScene).queueChange { ->
+				entity.scene.addChild(new Bullet(entity.transform, velocity))
+			}
 			firingCooldown = 0.5f
 		}
 	}

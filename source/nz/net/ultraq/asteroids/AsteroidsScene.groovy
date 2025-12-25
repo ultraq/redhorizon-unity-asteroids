@@ -40,6 +40,9 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 	final CameraEntity camera
 	private final BasicShader shader
+	private final List<GameLogicComponent> gameLogicComponents = new ArrayList<>()
+	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
+	private final Queue<Closure> changeQueue = new ArrayDeque<>()
 
 	/**
 	 * Constructor, create a new scene to the given dimensions.
@@ -67,11 +70,20 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	}
 
 	/**
+	 * Queue some scene modification to be performed at the end of the current
+	 * update cycle.
+	 */
+	void queueChange(Closure change) {
+
+		changeQueue.add(change)
+	}
+
+	/**
 	 * Draw out all the graphical components of the scene.
 	 */
 	void render() {
 
-		var graphicsComponents = new ArrayList<GraphicsComponent>()
+		graphicsComponents.clear()
 		traverse { node ->
 			if (node instanceof Entity) {
 				node.findComponentsByType(GraphicsComponent, graphicsComponents)
@@ -92,7 +104,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	void update(float delta) {
 
 		// TODO: Similar to above, these look like they should be the "S" part of ECS
-		var gameLogicComponents = new ArrayList<GameLogicComponent>()
+		gameLogicComponents.clear()
 		traverse { node ->
 			if (node instanceof Entity) {
 				node.findComponentsByType(GameLogicComponent, gameLogicComponents)
@@ -100,6 +112,10 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		}
 		gameLogicComponents.each { component ->
 			component.update(delta)
+		}
+
+		while (changeQueue) {
+			changeQueue.poll().call()
 		}
 	}
 }

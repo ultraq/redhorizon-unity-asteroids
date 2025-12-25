@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
  */
 class BulletScript extends EntityScript<Bullet> {
 
-	static final float bulletSpeed = 500f
+	static final float bulletSpeed = 800f
 	static final float bulletLifetime = 1.2f
 	private static final Logger logger = LoggerFactory.getLogger(BulletScript)
 
@@ -41,14 +41,15 @@ class BulletScript extends EntityScript<Bullet> {
 
 		// Destroy bullet if it reaches the max lifetime
 		if (bulletTimer > bulletLifetime) {
-//			(entity.scene as AsteroidsScene).queueDeletion(entity)
-			entity.scene.removeChild(entity)
-			entity.close()
+			(entity.scene as AsteroidsScene).queueChange { ->
+				entity.scene.removeChild(entity)
+				entity.close()
+			}
 		}
 
 		// Keep moving along
 		else {
-			entity.translate(0f, bulletSpeed * delta as float, 0f)
+			entity.translate(0f, (bulletSpeed + entity.initialVelocity.length()) * delta as float, 0f)
 		}
 	}
 }
