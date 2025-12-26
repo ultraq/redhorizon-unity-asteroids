@@ -36,8 +36,6 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-import java.util.concurrent.atomic.AtomicInteger
-
 /**
  * Pew pew.
  *
@@ -48,7 +46,6 @@ class Bullet extends Entity<Bullet> {
 	static final float bulletSpeed = 800f
 	static final float bulletLifetime = 1.2f
 	private static final Logger logger = LoggerFactory.getLogger(Bullet)
-	private static final AtomicInteger count = new AtomicInteger(1)
 
 	final Vector2fc initialVelocity
 
@@ -77,8 +74,6 @@ class Bullet extends Entity<Bullet> {
 			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.YELLOW),
 			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.YELLOW)
 		}))
-
-		withName("Bullet ${count.getAndIncrement()}")
 	}
 
 	/**

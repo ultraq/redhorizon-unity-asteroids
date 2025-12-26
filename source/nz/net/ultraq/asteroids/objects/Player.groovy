@@ -48,6 +48,7 @@ class Player extends Entity<Player> {
 	static final float maxThrustSpeed = 500f
 	static final float linearDrag = 1f
 	private static final Logger logger = LoggerFactory.getLogger(Player)
+	private static int bulletCount = 1
 
 	final String name = 'Player'
 
@@ -193,7 +194,8 @@ class Player extends Entity<Player> {
 
 			if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
 				(entity.scene as AsteroidsScene).queueChange { ->
-					entity.scene.addChild(new Bullet(entity.transform, velocity))
+					entity.scene.addChild(new Bullet(entity.transform, velocity)
+						.withName("Bullet ${bulletCount++}"))
 				}
 				firingCooldown = 0.25f
 			}
