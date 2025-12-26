@@ -17,11 +17,11 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.engine.BoxCollisionComponent
+import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
+import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
@@ -29,6 +29,7 @@ import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Vector2f
 import org.joml.Vector3f
+import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -57,17 +58,15 @@ class Player extends Entity<Player> {
 		var scriptEngine = SCRIPT_ENGINE.get()
 
 		var playerImage = resourceManager.loadImage('Player.png')
-		var width = playerImage.width
-		var height = playerImage.height
 		addComponent(new SpriteComponent(playerImage, BasicShader))
-		addComponent(new BoxCollisionComponent(width, height))
+		addComponent(new CircleCollisionComponent(playerImage.width / 2))
 		addComponent(new ScriptComponent(scriptEngine, PlayerScript))
 	}
 
 	/**
 	 * Player movement and behaviour script.
 	 */
-	static class PlayerScript extends EntityScript {
+	static class PlayerScript extends EntityScript<Player> {
 
 		private final InputEventHandler input
 		private SpriteComponent sprite
@@ -109,7 +108,7 @@ class Player extends Entity<Player> {
 		}
 
 		@Override
-		void onCollision(Rectanglef playerBounds, Entity otherEntity, Rectanglef otherBounds) {
+		void onCollision(Circlef playerBounds, Entity otherEntity, Circlef otherBounds) {
 
 			if (otherEntity !instanceof Bullet) {
 				logger.debug('The player collided with {}!', otherEntity.name)

@@ -17,19 +17,21 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.engine.BoxCollisionComponent
+import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
+import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
+import org.joml.Vector2f
 import org.joml.Vector2fc
-import org.joml.primitives.Rectanglef
+import org.joml.Vector3f
+import org.joml.primitives.Circlef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
@@ -41,6 +43,7 @@ import org.slf4j.LoggerFactory
 class Asteroid extends Entity<Asteroid> {
 
 	static final float baseSpeed = 100f
+	static int count = 1
 	private static final Logger logger = LoggerFactory.getLogger(Asteroid)
 
 	/**
@@ -70,11 +73,9 @@ class Asteroid extends Entity<Asteroid> {
 			.scale(size == Size.LARGE ? 1f : size == Size.MEDIUM ? 0.5f : 0.25f)
 
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
-		var width = asteroidImage.width
-		var height = asteroidImage.height
 		addComponent(new SpriteComponent(asteroidImage, BasicShader)
 			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
-		addComponent(new BoxCollisionComponent(width, height))
+		addComponent(new CircleCollisionComponent(asteroidImage.width / 2))
 		addComponent(new ScriptComponent(scriptEngine, AsteroidScript))
 	}
 
@@ -87,6 +88,10 @@ class Asteroid extends Entity<Asteroid> {
 		private Matrix4f expandedViewProjection = new Matrix4f()
 		private FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private boolean visible = false
+		private Vector2f splitPosition1 = new Vector2f()
+		private Vector2f splitPosition2 = new Vector2f()
+		private Vector3f splitRotation1 = new Vector3f()
+		private Vector3f splitRotation2 = new Vector3f()
 
 		@Override
 		void init() {
@@ -95,10 +100,35 @@ class Asteroid extends Entity<Asteroid> {
 		}
 
 		@Override
-		void onCollision(Rectanglef asteroidBounds, Entity otherEntity, Rectanglef otherBounds) {
+		void onCollision(Circlef asteroidBounds, Entity otherEntity, Circlef otherBounds) {
 
-			if (otherEntity !instanceof Asteroid) {
-				logger.debug('An asteroid collided with {}!', otherEntity.name)
+			if (otherEntity instanceof Bullet) {
+				var scene = entity.scene as AsteroidsScene
+
+				if (entity.size == Size.LARGE || entity.size == Size.MEDIUM) {
+					logger.debug('{} collided with bullet - splitting', entity.name)
+					scene.queueChange { ->
+						var newSize = entity.size == Size.LARGE ? Size.MEDIUM : Size.SMALL
+						scene.addChild(
+							new Asteroid(newSize, splitPosition1.set(entity.position).add(-4f, 0f),
+								entity.transform.getEulerAnglesXYZ(splitRotation1)
+									.add(0f, 0f, Math.toRadians(Math.random() * 60) as float).z)
+								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
+						scene.addChild(
+							new Asteroid(newSize, splitPosition2.set(entity.position).add(4f, 0f),
+								entity.transform.getEulerAnglesXYZ(splitRotation2)
+									.add(0f, 0f, Math.toRadians(Math.random() * -60) as float).z)
+								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
+					}
+				}
+				else {
+					logger.debug('{} collided with bullet - destroying', entity.name)
+				}
+
+				scene.queueChange { ->
+					entity.parent.removeChild(entity)
+					entity.close()
+				}
 			}
 		}
 
@@ -110,8 +140,9 @@ class Asteroid extends Entity<Asteroid> {
 			var lastVisible = visible
 			var nowVisible = frustumIntersection.testPoint(entity.position)
 			if (lastVisible && !nowVisible) {
-				((AsteroidsScene)entity.scene).queueChange { ->
+				(entity.scene as AsteroidsScene).queueChange { ->
 					entity.parent.removeChild(entity)
+					entity.close()
 				}
 				return
 			}
@@ -120,7 +151,7 @@ class Asteroid extends Entity<Asteroid> {
 			}
 
 			// Keep moving along
-			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 1.5f : 2f)
+			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 3f : 12f)
 			entity.transform.translate(0f, speed * delta as float, 0f)
 		}
 	}
