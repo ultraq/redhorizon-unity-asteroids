@@ -32,6 +32,8 @@ import org.joml.Vector2f
  */
 class AsteroidSpawner extends Entity<AsteroidSpawner> {
 
+	final String name = 'Asteroid spawner'
+
 	/**
 	 * Constructor, create a new asteroid spawner.
 	 */
@@ -80,7 +82,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 //				String.format("%.2f", Math.toDegrees(spawnAngle)), spawnPoint, String.format("%.2f", Math.toDegrees(spawnRotation)))
 
 				scene.queueChange { ->
-					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
+					entity.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
 						.withName("Asteroid ${count++} (large)"))
 				}
 				spawnTimer = 0f

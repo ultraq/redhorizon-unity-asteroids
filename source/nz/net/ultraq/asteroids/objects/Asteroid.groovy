@@ -17,17 +17,26 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
+import nz.net.ultraq.asteroids.engine.BoxCollisionComponent
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
+import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
 import org.joml.Vector2fc
+import org.joml.Vector3f
+import org.joml.primitives.Rectanglef
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * The big rocks we'll be shooting at!
@@ -37,6 +46,7 @@ import org.joml.Vector2fc
 class Asteroid extends Entity<Asteroid> {
 
 	static final float baseSpeed = 100f
+	private static final Logger logger = LoggerFactory.getLogger(Asteroid)
 
 	/**
 	 * The sizes of asteroid available.
@@ -65,10 +75,20 @@ class Asteroid extends Entity<Asteroid> {
 			.scale(size == Size.LARGE ? 1f : size == Size.MEDIUM ? 0.5f : 0.25f)
 
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
+		var width = asteroidImage.width
+		var height = asteroidImage.height
 		addComponent(new SpriteComponent(asteroidImage, BasicShader)
-			.translate(-asteroidImage.width / 2 as float, -asteroidImage.height / 2 as float, 0f)
 			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
+		addComponent(new BoxCollisionComponent(width, height))
 		addComponent(new ScriptComponent(scriptEngine, AsteroidScript))
+
+		// TODO: Some debug flag to show collision lines so we don't have to program these in
+		addComponent(new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.YELLOW)
+		}))
 	}
 
 	/**
@@ -88,6 +108,14 @@ class Asteroid extends Entity<Asteroid> {
 		}
 
 		@Override
+		void onCollision(Rectanglef asteroidBounds, Entity otherEntity, Rectanglef otherBounds) {
+
+			if (otherEntity !instanceof Asteroid) {
+				logger.debug('An asteroid collided with {}!', otherEntity.name)
+			}
+		}
+
+		@Override
 		void update(float delta) {
 
 			// Track visibility to know when to remove the object
@@ -96,7 +124,7 @@ class Asteroid extends Entity<Asteroid> {
 			var nowVisible = frustumIntersection.testPoint(entity.position)
 			if (lastVisible && !nowVisible) {
 				((AsteroidsScene)entity.scene).queueChange { ->
-					entity.scene.removeChild(entity)
+					entity.parent.removeChild(entity)
 				}
 				return
 			}

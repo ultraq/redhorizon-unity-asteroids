@@ -17,12 +17,16 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.ScopedValues
+import nz.net.ultraq.asteroids.engine.BoxCollisionComponent
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
+import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.*
@@ -30,6 +34,8 @@ import static nz.net.ultraq.asteroids.ScopedValues.*
 import org.joml.Vector2f
 import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
 /**
@@ -41,6 +47,7 @@ class Player extends Entity<Player> {
 
 	static final float maxThrustSpeed = 500f
 	static final float linearDrag = 1f
+	private static final Logger logger = LoggerFactory.getLogger(Player)
 
 	final String name = 'Player'
 
@@ -53,9 +60,19 @@ class Player extends Entity<Player> {
 		var scriptEngine = SCRIPT_ENGINE.get()
 
 		var playerImage = resourceManager.loadImage('Player.png')
-		addComponent(new SpriteComponent(playerImage, BasicShader)
-			.translate(-playerImage.width / 2 as float, -playerImage.height / 2 as float, 0f))
+		var width = playerImage.width
+		var height = playerImage.height
+		addComponent(new SpriteComponent(playerImage, BasicShader))
+		addComponent(new BoxCollisionComponent(width, height))
 		addComponent(new ScriptComponent(scriptEngine, PlayerScript))
+
+		// TODO: Some debug flag to show collision lines so we don't have to program these in
+		addComponent(new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.YELLOW),
+			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.YELLOW)
+		}))
 	}
 
 	/**
@@ -88,7 +105,7 @@ class Player extends Entity<Player> {
 		 */
 		PlayerScript() {
 
-			input = ScopedValues.INPUT_EVENT_HANDLER.get()
+			input = INPUT_EVENT_HANDLER.get()
 		}
 
 		@Override
@@ -100,6 +117,14 @@ class Player extends Entity<Player> {
 			var worldBounds = new Rectanglef().setMax(scene.WIDTH, scene.HEIGHT).center()
 			worldBoundsMin = worldBounds.getMin(new Vector2f())
 			worldBoundsMax = worldBounds.getMax(new Vector2f())
+		}
+
+		@Override
+		void onCollision(Rectanglef playerBounds, Entity otherEntity, Rectanglef otherBounds) {
+
+			if (otherEntity !instanceof Bullet) {
+				logger.debug('The player collided with {}!', otherEntity.name)
+			}
 		}
 
 		@Override
