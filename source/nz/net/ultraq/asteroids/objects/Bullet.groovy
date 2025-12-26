@@ -19,19 +19,14 @@ package nz.net.ultraq.asteroids.objects
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.engine.BoxCollisionComponent
 import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
-import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -66,14 +61,6 @@ class Bullet extends Entity<Bullet> {
 		addComponent(new SpriteComponent(bulletImage, BasicShader))
 		addComponent(new BoxCollisionComponent(width, height))
 		addComponent(new ScriptComponent(scriptEngine, BulletScript))
-
-		// TODO: Some debug flag to show collision lines so we don't have to program these in
-		addComponent(new MeshComponent(Type.LINE_LOOP, new Vertex[]{
-			new Vertex(new Vector3f(-width / 2, -height / 2, 0), Colour.YELLOW),
-			new Vertex(new Vector3f(width / 2, -height / 2, 0), Colour.YELLOW),
-			new Vertex(new Vector3f(width / 2, height / 2, 0), Colour.YELLOW),
-			new Vertex(new Vector3f(-width / 2, height / 2, 0), Colour.YELLOW)
-		}))
 	}
 
 	/**
