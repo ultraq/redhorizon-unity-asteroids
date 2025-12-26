@@ -47,6 +47,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 	 */
 	static class AsteroidSpawnerScript extends EntityScript<AsteroidSpawner> {
 
+		private static int count = 1
 		private static float spawnInterval = 2f
 		private static float spawnTimer = 0f
 
@@ -72,14 +73,15 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 				var spawnAngle = Math.random() * 2 * Math.PI
 				spawnPoint
 					.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float)
-					.mul(scene.WIDTH / 2 as float)
+					.mul(scene.WIDTH / 1.8f as float)
 				var spawnRotation = Vector2f.UP.angle(headingCenter.set(spawnPoint).mul(-1f)) +
 					(Math.toRadians(Math.random() * 30 - 15)) as float
 //			logger.debug('Spawn angle: {}, spawn point: {}, spawn rotation: {}',
 //				String.format("%.2f", Math.toDegrees(spawnAngle)), spawnPoint, String.format("%.2f", Math.toDegrees(spawnRotation)))
 
 				scene.queueChange { ->
-					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation))
+					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
+						.withName("Asteroid ${count++} (large)"))
 				}
 				spawnTimer = 0f
 			}

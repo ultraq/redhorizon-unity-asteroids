@@ -16,13 +16,17 @@
 
 package nz.net.ultraq.asteroids.objects
 
+import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
+import org.joml.FrustumIntersection
+import org.joml.Matrix4f
 import org.joml.Vector2fc
 
 /**
@@ -72,9 +76,35 @@ class Asteroid extends Entity<Asteroid> {
 	 */
 	static class AsteroidScript extends EntityScript<Asteroid> {
 
+		private CameraEntity camera
+		private Matrix4f expandedViewProjection = new Matrix4f()
+		private FrustumIntersection frustumIntersection = new FrustumIntersection()
+		private boolean visible = false
+
+		@Override
+		void init() {
+
+			camera = ((AsteroidsScene)entity.scene).camera
+		}
+
 		@Override
 		void update(float delta) {
 
+			// Track visibility to know when to remove the object
+			frustumIntersection.set(expandedViewProjection.set(camera.viewProjection).scale(0.8f), false)
+			var lastVisible = visible
+			var nowVisible = frustumIntersection.testPoint(entity.position)
+			if (lastVisible && !nowVisible) {
+				((AsteroidsScene)entity.scene).queueChange { ->
+					entity.scene.removeChild(entity)
+				}
+				return
+			}
+			else if (!lastVisible && nowVisible) {
+				visible = true
+			}
+
+			// Keep moving along
 			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 1.5f : 2f)
 			entity.transform.translate(0f, speed * delta as float, 0f)
 		}
