@@ -72,11 +72,9 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 			// with a little variance so that it flies back towards the play area.
 			if (spawnTimer >= spawnInterval) {
 				var spawnAngle = Math.random() * 2 * Math.PI
-				spawnPoint
-					.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float)
-					.mul(scene.WIDTH / 1.8f as float)
-				var spawnRotation = Vector2f.UP.angle(headingCenter.set(spawnPoint).mul(-1f)) +
-					(Math.toRadians(Math.random() * 30 - 15)) as float
+				spawnPoint.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float).mul(scene.WIDTH / 1.8f as float)
+				headingCenter.set(spawnPoint).mul(-1f)
+				var spawnRotation = Vector2f.UP.angle(headingCenter) + (Math.toRadians(Math.random() * 30 - 15)) as float
 //			logger.debug('Spawn angle: {}, spawn point: {}, spawn rotation: {}',
 //				String.format("%.2f", Math.toDegrees(spawnAngle)), spawnPoint, String.format("%.2f", Math.toDegrees(spawnRotation)))
 

@@ -52,7 +52,7 @@ class CircleCollisionComponent extends GameLogicComponent<CircleCollisionCompone
 			return
 		}
 
-		var position = entity.position
+		var position = entity.globalPosition
 		var bounds = new Circlef(position.x(), position.y(), radius)
 
 		// Check this component against all others in the scene
@@ -67,7 +67,7 @@ class CircleCollisionComponent extends GameLogicComponent<CircleCollisionCompone
 		}
 
 		otherCollisions.each { other ->
-			var otherPosition = other.entity.position
+			var otherPosition = other.entity.globalPosition
 			var collision = Intersectionf.testCircleCircle(position.x(), position.y(), radius,
 				otherPosition.x(), otherPosition.y(), other.radius)
 			if (collision) {

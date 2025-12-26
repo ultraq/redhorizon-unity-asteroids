@@ -16,20 +16,26 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
 import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
+import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
+import org.joml.Vector3f
 import org.joml.primitives.Rectanglef
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_C
 
 /**
  * Scene setup for the Asteroids game.
@@ -40,6 +46,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 	static final int WIDTH = 1920
 	static final int HEIGHT = 1440
+	private static final String COLLISION_OUTLINE_NAME = 'Collision outline'
 
 	final CameraEntity camera
 	private final BasicShader shader
@@ -47,6 +54,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final Queue<Closure> changeQueue = new ArrayDeque<>()
 	private final InputEventHandler input
+	private boolean showCollisionOutlines = false
 
 	/**
 	 * Constructor, create a new scene to the given dimensions.
@@ -110,10 +118,38 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	 */
 	void update(float delta) {
 
+		// Toggle the addition/removal of a mesh to draw the collision outlines on entities
+		if (input.keyPressed(GLFW_KEY_C, true)) {
+			showCollisionOutlines = !showCollisionOutlines
+		}
+
 		// TODO: Similar to the update method, these look like they should be the "S" part of ECS
 		gameLogicComponents.clear()
 		traverse { node ->
 			if (node instanceof Entity) {
+				if (showCollisionOutlines) {
+					var collision = node.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
+					var collisionOutline = node.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
+					if (collision && !collisionOutline) {
+						var radius = collision.radius
+						node.addComponent(
+							new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+								new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
+							})
+								.withName(COLLISION_OUTLINE_NAME))
+					}
+				}
+				else {
+					var collisionOutline = node.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
+					if (collisionOutline) {
+						node.removeComponent(collisionOutline)
+						collisionOutline.close()
+					}
+				}
+
 				node.findComponentsByType(GameLogicComponent, gameLogicComponents)
 			}
 		}
