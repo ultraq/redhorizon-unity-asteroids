@@ -17,6 +17,7 @@
 package nz.net.ultraq.asteroids.extensions
 
 import org.joml.Vector2f
+import org.joml.Vector2fc
 
 /**
  * Extensions to JOML's {@link Vector2f} class.
@@ -25,12 +26,12 @@ import org.joml.Vector2f
  */
 class Vector2fExtensions {
 
-	private static final Vector2f UP = new Vector2f(0f, 1f)
+	private static final Vector2fc UP = new Vector2f(0f, 1f)
 
 	/**
 	 * Return a reusable vector for the 'up' direction in this game.
 	 */
-	static Vector2f getUP(Vector2f self) {
+	static Vector2fc getUP(Vector2f self) {
 
 		return UP
 	}
