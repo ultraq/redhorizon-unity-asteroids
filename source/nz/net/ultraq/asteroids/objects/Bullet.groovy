@@ -67,16 +67,18 @@ class Bullet extends Entity<Bullet> {
 	static class BulletScript extends EntityScript<Bullet> {
 
 		private float bulletTimer
+		private boolean queuedForRemoval = false
 
 		@Override
 		void onCollision(Circlef bulletBounds, Entity otherEntity, Circlef otherBounds) {
 
-			if (otherEntity instanceof Asteroid) {
+			if (otherEntity instanceof Asteroid && !queuedForRemoval) {
 				logger.debug('Bullet collided with {} - removing from scene', otherEntity.name)
 				(entity.scene as AsteroidsScene).queueChange { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}
+				queuedForRemoval = true
 			}
 		}
 
@@ -86,11 +88,12 @@ class Bullet extends Entity<Bullet> {
 			bulletTimer += delta
 
 			// Destroy bullet if it reaches the max lifetime
-			if (bulletTimer > bulletLifetime) {
+			if (bulletTimer > bulletLifetime && !queuedForRemoval) {
 				(entity.scene as AsteroidsScene).queueChange { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}
+				queuedForRemoval = true
 			}
 
 			// Keep moving along
