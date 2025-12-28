@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.asteroids.engine
 
-import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 
 import org.joml.primitives.Circlef
@@ -30,10 +27,9 @@ import org.joml.primitives.Intersectionf
  *
  * @author Emanuel Rabina
  */
-class CircleCollisionComponent extends GameLogicComponent<CircleCollisionComponent> {
+class CircleCollisionComponent extends CollisionComponent<CircleCollisionComponent> {
 
 	final float radius
-	boolean checked = false
 	private final List<CircleCollisionComponent> otherCollisions = new ArrayList<>()
 
 	/**
@@ -45,40 +41,26 @@ class CircleCollisionComponent extends GameLogicComponent<CircleCollisionCompone
 	}
 
 	@Override
-	void update(float delta) {
+	void checkCollision(CollisionComponent other) {
 
-		if (checked) {
-			checked = false
+		// TODO: Allow collision checks across different shapes
+		if (other !instanceof CircleCollisionComponent) {
 			return
 		}
 
 		var position = entity.globalPosition
 		var bounds = new Circlef(position.x(), position.y(), radius)
 
-		// Check this component against all others in the scene
-		// TODO: Perform this more efficiently with something like a quad tree to
-		//       reduce the number of checks to just those within a close area.
-		var scene = entity.scene as AsteroidsScene
-		otherCollisions.clear()
-		scene.traverse { node ->
-			if (node instanceof Entity && node != entity) {
-				node.findComponentsByType(CircleCollisionComponent, otherCollisions)
-			}
-		}
+		var otherPosition = other.entity.globalPosition
+		var collision = Intersectionf.testCircleCircle(position.x(), position.y(), radius,
+			otherPosition.x(), otherPosition.y(), other.radius)
+		if (collision) {
+			var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius)
+			var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
+			scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
 
-		otherCollisions.each { other ->
-			var otherPosition = other.entity.globalPosition
-			var collision = Intersectionf.testCircleCircle(position.x(), position.y(), radius,
-				otherPosition.x(), otherPosition.y(), other.radius)
-			if (collision) {
-				var otherBounds = new Circlef(otherPosition.x(), otherPosition.y(), other.radius)
-				var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
-				scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
-
-				var otherScriptComponent = other.entity.findComponentByType(ScriptComponent) as ScriptComponent
-				otherScriptComponent?.script?.onCollision(otherBounds, entity, bounds)
-				other.checked = true
-			}
+			var otherScriptComponent = other.entity.findComponentByType(ScriptComponent) as ScriptComponent
+			otherScriptComponent?.script?.onCollision(otherBounds, entity, bounds)
 		}
 	}
 }

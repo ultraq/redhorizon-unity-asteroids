@@ -16,9 +16,6 @@
 
 package nz.net.ultraq.asteroids.engine
 
-import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 
 import org.joml.primitives.Rectanglef
@@ -29,7 +26,7 @@ import org.joml.primitives.Rectanglef
  *
  * @author Emanuel Rabina
  */
-class BoxCollisionComponent extends GameLogicComponent<BoxCollisionComponent> {
+class BoxCollisionComponent extends CollisionComponent<BoxCollisionComponent> {
 
 	final float width
 	final float height
@@ -47,33 +44,27 @@ class BoxCollisionComponent extends GameLogicComponent<BoxCollisionComponent> {
 	}
 
 	@Override
-	void update(float delta) {
+	void checkCollision(CollisionComponent other) {
 
-		var position = entity.position
-		bounds.center().translate(position.x(), position.y())
-
-		// Check this component against all others in the scene
-		// TODO: Perform this more efficiently with something like a quad tree to
-		//       reduce the number of checks to just those within a close area.
-		var scene = entity.scene as AsteroidsScene
-		otherCollisions.clear()
-		scene.traverse { node ->
-			if (node instanceof Entity && node != entity) {
-				node.findComponentsByType(BoxCollisionComponent, otherCollisions)
-			}
+		// TODO: Allow collision checks across different shapes
+		if (other !instanceof BoxCollisionComponent) {
+			return
 		}
 
-		otherCollisions.each { other ->
-			var otherPosition = other.entity.position
-			var otherBounds = new Rectanglef(0, 0, other.width, other.height)
-				.center()
-				.translate(otherPosition.x(), otherPosition.y())
+		var position = entity.globalPosition
+		bounds.center().translate(position.x(), position.y())
 
-			// If a collision is detected, notify the script attached to the entity
-			if (bounds.intersectsRectangle(otherBounds)) {
-				var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
-				scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
-			}
+		var otherPosition = other.entity.globalPosition
+		var otherBounds = new Rectanglef(0, 0, other.width, other.height)
+			.center()
+			.translate(otherPosition.x(), otherPosition.y())
+
+		if (bounds.intersectsRectangle(otherBounds)) {
+			var scriptComponent = entity.findComponentByType(ScriptComponent) as ScriptComponent
+			scriptComponent?.script?.onCollision(bounds, other.entity, otherBounds)
+
+			var otherScriptComponent = other.entity.findComponentByType(ScriptComponent) as ScriptComponent
+			otherScriptComponent?.script?.onCollision(otherBounds, entity, bounds)
 		}
 	}
 }

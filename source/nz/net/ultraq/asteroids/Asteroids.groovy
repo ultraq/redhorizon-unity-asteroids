@@ -91,14 +91,13 @@ class Asteroids implements Runnable {
 					while (!window.shouldClose()) {
 						var delta = deltaTimer.deltaTime()
 
-						// Logic/update
+						// TODO: Each of these parts look like the "S" part of an ECS, so
+						//       should be split as such.
 						input.processInputs()
 						scene.update(delta)
-
-						// Render
-						window.useWindow { ->
-							scene.render()
-						}
+						scene.checkCollisions()
+						scene.render()
+						scene.processQueuedChanges()
 
 						Thread.yield()
 					}

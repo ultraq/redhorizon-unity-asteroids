@@ -16,12 +16,14 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
 import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
+import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
@@ -38,7 +40,9 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 	final CameraEntity camera
 	final Player player
+	private final Window window
 	private final BasicShader shader
+	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
 	private final List<GameLogicComponent> gameLogicComponents = new ArrayList<>()
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final Queue<Closure> changeQueue = new ArrayDeque<>()
@@ -48,7 +52,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	 */
 	AsteroidsScene() {
 
-		var window = WINDOW.get()
+		window = WINDOW.get()
 
 		camera = new CameraEntity(WIDTH, HEIGHT, window)
 		shader = new BasicShader()
@@ -59,6 +63,25 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		addChild(new AsteroidSpawner())
 	}
 
+	/**
+	 * Perform collision checks between all entities in the scene.
+	 */
+	void checkCollisions() {
+
+		// TODO: Yet another ECS system part
+		collisionComponents.clear()
+		traverse(Entity) { Entity entity ->
+			entity.findComponentsByType(CollisionComponent, collisionComponents)
+		}
+		for (var i = 0; i < collisionComponents.size(); i++) {
+			var component = collisionComponents.get(i)
+			for (var j = i + 1; j < collisionComponents.size(); j++) {
+				var other = collisionComponents.get(j)
+				component.checkCollision(other)
+			}
+		}
+	}
+
 	@Override
 	void close() {
 
@@ -66,6 +89,16 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 			if (node instanceof AutoCloseable) {
 				node.close()
 			}
+		}
+	}
+
+	/**
+	 * Apply modifications made by other steps in the game loop.
+	 */
+	void processQueuedChanges() {
+
+		while (changeQueue) {
+			changeQueue.poll().call()
 		}
 	}
 
@@ -85,16 +118,16 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 		// TODO: Similar to the update method, these look like they should be the "S" part of ECS
 		graphicsComponents.clear()
-		traverse { node ->
-			if (node instanceof Entity) {
-				node.findComponentsByType(GraphicsComponent, graphicsComponents)
-			}
+		traverse(Entity) { Entity entity ->
+			entity.findComponentsByType(GraphicsComponent, graphicsComponents)
 		}
 
-		shader.useShader { shaderContext ->
-			camera.render(shaderContext)
-			graphicsComponents.each { component ->
-				component.render(shaderContext)
+		window.useWindow { ->
+			shader.useShader { shaderContext ->
+				camera.render(shaderContext)
+				graphicsComponents.each { component ->
+					component.render(shaderContext)
+				}
 			}
 		}
 	}
@@ -106,17 +139,11 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 		// TODO: Similar to the render method, these look like they should be the "S" part of ECS
 		gameLogicComponents.clear()
-		traverse { node ->
-			if (node instanceof Entity) {
-				node.findComponentsByType(GameLogicComponent, gameLogicComponents)
-			}
+		traverse(Entity) { Entity entity ->
+			entity.findComponentsByType(GameLogicComponent, gameLogicComponents)
 		}
 		gameLogicComponents.each { component ->
 			component.update(delta)
-		}
-
-		while (changeQueue) {
-			changeQueue.poll().call()
 		}
 	}
 }
