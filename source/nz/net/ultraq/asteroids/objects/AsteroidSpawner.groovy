@@ -24,6 +24,8 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
 
 import org.joml.Vector2f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Game object responsible for creating asteroids.
@@ -31,6 +33,8 @@ import org.joml.Vector2f
  * @author Emanuel Rabina
  */
 class AsteroidSpawner extends Entity<AsteroidSpawner> {
+
+	private static final Logger logger = LoggerFactory.getLogger(AsteroidSpawner)
 
 	final String name = 'Asteroid spawner'
 
@@ -49,10 +53,14 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 	 */
 	static class AsteroidSpawnerScript extends EntityScript<AsteroidSpawner> {
 
-		private static float spawnInterval = 2f
-		private static float spawnTimer = 0f
+		private static float minSpawnRate = 2f
+		private static float maxSpawnRate = 1f
+		private static float spawnRateIncreaseInterval = 10f
 
 		private AsteroidsScene scene
+		private float spawnRate = minSpawnRate
+		private float spawnTimer = 0f
+		private float spawnRateIncreaseTimer = 0f
 		private Vector2f spawnPoint = new Vector2f()
 		private Vector2f headingCenter = new Vector2f()
 
@@ -70,19 +78,26 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 			// Spawn a new asteroid at some random point in a circle that surrounds
 			// the visible area.  This asteroid is then rotated towards the center
 			// with a little variance so that it flies back towards the play area.
-			if (spawnTimer >= spawnInterval) {
+			if (spawnTimer >= spawnRate) {
 				var spawnAngle = Math.random() * 2 * Math.PI
 				spawnPoint.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float).mul(scene.WIDTH / 1.8f as float)
 				headingCenter.set(spawnPoint).mul(-1f)
 				var spawnRotation = Vector2f.UP.angle(headingCenter) + (Math.toRadians(Math.random() * 30 - 15)) as float
-//			logger.debug('Spawn angle: {}, spawn point: {}, spawn rotation: {}',
-//				String.format("%.2f", Math.toDegrees(spawnAngle)), spawnPoint, String.format("%.2f", Math.toDegrees(spawnRotation)))
-
+				logger.debug('Spawn point: {}', spawnPoint)
 				scene.queueChange { ->
 					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
 						.withName("Asteroid ${Asteroid.count++} (large)"))
 				}
-				spawnTimer = 0f
+				spawnTimer -= spawnRate
+			}
+
+			spawnRateIncreaseTimer += delta
+
+			// Steadily increase the asteroid spawn rate
+			if (spawnRate > maxSpawnRate && spawnRateIncreaseTimer >= spawnRateIncreaseInterval) {
+				spawnRate = Math.max(spawnRate - 0.1f, maxSpawnRate) as float
+				spawnRateIncreaseTimer -= spawnRateIncreaseInterval
+				logger.debug('Spawn rate increased!  Now at {}s', String.format("%.2f", spawnRate))
 			}
 		}
 	}

@@ -63,22 +63,22 @@ class DebugBinding implements InputBinding {
 			window.toggleImGuiDebugOverlays()
 			window.toggleImGuiDebugWindows()
 
+			// Manage scene grid lines
+			var gridLines = scene.findDescendent { it instanceof GridLinesEntity } as GridLinesEntity
 			if (debug) {
-				// Add scene grid lines
-				var gridLines = scene.findDescendent { it instanceof GridLinesEntity } as GridLinesEntity
 				if (!gridLines) {
 					scene.insertBefore(
 						new GridLinesEntity(new Rectanglef(0f, 0f, scene.WIDTH, scene.HEIGHT).center(), 50f, Colour.RED, Colour.GREY)
 							.withName('Grid lines'),
 						scene.player)
 				}
+				else {
+					gridLines.enable()
+				}
 			}
 			else {
-				// Remove scene grid lines
-				var gridLines = scene.findDescendent { it instanceof GridLinesEntity } as GridLinesEntity
 				if (gridLines) {
-					scene.removeChild(gridLines)
-					gridLines.close()
+					gridLines.disable()
 				}
 			}
 		}
@@ -89,29 +89,28 @@ class DebugBinding implements InputBinding {
 			var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
 			if (debug) {
 				if (collision) {
-					if (collision.enabled) {
-						if (!collisionOutline) {
-							var radius = collision.radius
-							entity.addComponent(
-								new MeshComponent(Type.LINE_LOOP, new Vertex[]{
-									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
-									new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
-								})
-									.withName(COLLISION_OUTLINE_NAME))
-						}
+					if (!collisionOutline) {
+						var radius = collision.radius
+						collisionOutline = entity.addAndReturnComponent(
+							new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+								new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
+							})
+								.withName(COLLISION_OUTLINE_NAME))
 					}
-					else if (collisionOutline) {
-						entity.removeComponent(collisionOutline)
-						collisionOutline.close()
+					if (collision.enabled) {
+						collisionOutline.enable()
+					}
+					else {
+						collisionOutline.disable()
 					}
 				}
 			}
 			else {
 				if (collisionOutline) {
-					entity.removeComponent(collisionOutline)
-					collisionOutline.close()
+					collisionOutline.disable()
 				}
 			}
 		}

@@ -132,7 +132,9 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 			shader.useShader { shaderContext ->
 				camera.render(shaderContext)
 				graphicsComponents.each { component ->
-					component.render(shaderContext)
+					if (component.enabled) {
+						component.render(shaderContext)
+					}
 				}
 			}
 		}
@@ -149,7 +151,9 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 			entity.findComponentsByType(GameLogicComponent, gameLogicComponents)
 		}
 		gameLogicComponents.each { component ->
-			component.update(delta)
+			if (component.enabled) {
+				component.update(delta)
+			}
 		}
 	}
 }
