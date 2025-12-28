@@ -112,12 +112,12 @@ class Asteroid extends Entity<Asteroid> {
 						scene.addChild(
 							new Asteroid(newSize, splitPosition1.set(entity.position).add(-4f, 0f),
 								entity.transform.getEulerAnglesXYZ(splitRotation1)
-									.add(0f, 0f, Math.toRadians(Math.random() * 60) as float).z)
+									.add(0f, 0f, Math.toRadians(Math.random() * 90) as float).z)
 								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
 						scene.addChild(
 							new Asteroid(newSize, splitPosition2.set(entity.position).add(4f, 0f),
 								entity.transform.getEulerAnglesXYZ(splitRotation2)
-									.add(0f, 0f, Math.toRadians(Math.random() * -60) as float).z)
+									.add(0f, 0f, Math.toRadians(Math.random() * -90) as float).z)
 								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
 					}
 				}

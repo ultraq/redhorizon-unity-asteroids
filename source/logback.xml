@@ -21,9 +21,14 @@
 			<pattern>[%thread] %-5level %logger{0} - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<logger name="nz.net.ultraq" level="DEBUG"/>
-	<logger name="nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine" level="INFO"/>
+	<appender name="gui" class="nz.net.ultraq.redhorizon.engine.logback.ImGuiLoggingAppender">
+		<encoder>
+			<pattern>%logger{0} - %msg%n</pattern>
+		</encoder>
+	</appender>
+	<logger name="nz.net.ultraq.asteroids" level="DEBUG"/>
 	<root level="INFO">
 		<appender-ref ref="console"/>
+		<appender-ref ref="gui"/>
 	</root>
 </configuration>

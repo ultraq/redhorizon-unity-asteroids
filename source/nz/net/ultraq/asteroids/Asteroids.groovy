@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
@@ -83,6 +84,7 @@ class Asteroids implements Runnable {
 						.addImGuiComponent(new DebugOverlay()
 							.withCursorTracking(scene.camera.camera, scene.camera.transform))
 						.addImGuiComponent(new NodeList(scene))
+						.addImGuiComponent(new LogPanel())
 						.show()
 					input.addInputBinding(new DebugBinding(scene, window))
 

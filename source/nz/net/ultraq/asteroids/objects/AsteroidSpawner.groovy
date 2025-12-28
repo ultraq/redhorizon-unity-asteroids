@@ -27,6 +27,8 @@ import org.joml.Vector2f
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+import static java.lang.String.format
+
 /**
  * Game object responsible for creating asteroids.
  *
@@ -83,7 +85,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 				spawnPoint.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float).mul(scene.WIDTH / 1.8f as float)
 				headingCenter.set(spawnPoint).mul(-1f)
 				var spawnRotation = Vector2f.UP.angle(headingCenter) + (Math.toRadians(Math.random() * 30 - 15)) as float
-				logger.debug('Spawn point: {}', spawnPoint)
+				logger.debug('Spawning asteroid at: {}, {}', format('%.2f', spawnPoint.x), format('%.2f', spawnPoint.y))
 				scene.queueChange { ->
 					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
 						.withName("Asteroid ${Asteroid.count++} (large)"))
@@ -97,7 +99,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 			if (spawnRate > maxSpawnRate && spawnRateIncreaseTimer >= spawnRateIncreaseInterval) {
 				spawnRate = Math.max(spawnRate - 0.1f, maxSpawnRate) as float
 				spawnRateIncreaseTimer -= spawnRateIncreaseInterval
-				logger.debug('Spawn rate increased!  Now at {}s', String.format("%.2f", spawnRate))
+				logger.debug('Spawn rate increased!  Now at {}s', format("%.2f", spawnRate))
 			}
 		}
 	}
