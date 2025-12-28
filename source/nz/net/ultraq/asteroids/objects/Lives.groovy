@@ -18,7 +18,9 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
-import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,33 +38,14 @@ class Lives extends Entity<Lives> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Lives)
 
-	private final ScheduledExecutorService executor
 	private int lives = 3
 
 	/**
 	 * Constructor, tie the lives to the player.
 	 */
-	Lives(AsteroidsScene scene, Player player) {
+	Lives() {
 
-		executor = Executors.newSingleThreadScheduledExecutor()
-
-		var window = WINDOW.get()
-
-		player.on(PlayerDestroyedEvent) { event ->
-			lives--
-			logger.debug('Lives: {}', lives)
-
-			if (!lives) {
-				logger.debug('Game over!')
-				scene.queueChange { ->
-					scene.clear()
-				}
-
-				executor.schedule({ ->
-					window.shouldClose(true)
-				}, 1, TimeUnit.SECONDS)
-			}
-		}
+		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), LivesScript))
 	}
 
 	/**
@@ -71,5 +54,48 @@ class Lives extends Entity<Lives> {
 	int getLives() {
 
 		return lives
+	}
+
+	/**
+	 * Script for tracking player lives.
+	 */
+	static class LivesScript extends EntityScript<Lives> implements AutoCloseable {
+
+		private ScheduledExecutorService executor
+
+		@Override
+		void close() {
+
+			executor.shutdown()
+		}
+
+		@Override
+		void init() {
+
+			executor = Executors.newSingleThreadScheduledExecutor()
+
+			var window = WINDOW.get()
+			var scene = entity.scene as AsteroidsScene
+
+			scene.player.on(PlayerDestroyedEvent) { event ->
+				entity.lives--
+				logger.debug('Lives: {}', entity.lives)
+
+				if (!entity.lives) {
+					logger.debug('Game over!')
+					scene.queueChange { ->
+						scene.clear()
+					}
+
+					executor.schedule({ ->
+						window.shouldClose(true)
+					}, 1, TimeUnit.SECONDS)
+				}
+			}
+		}
+
+		@Override
+		void update(float delta) {
+		}
 	}
 }

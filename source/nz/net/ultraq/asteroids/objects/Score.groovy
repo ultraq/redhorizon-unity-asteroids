@@ -17,9 +17,12 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
+import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
+import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -39,19 +42,9 @@ class Score extends Entity<Score> {
 	 * Constructor, tie a score component to the scene so we can know of changes
 	 * made to it.
 	 */
-	Score(AsteroidsScene scene) {
+	Score() {
 
-		scene.on(NodeAddedEvent) { nodeAddedEvent ->
-			var node = nodeAddedEvent.node()
-
-			if (node instanceof Asteroid) {
-				node.on(AsteroidDestroyedEvent) { asteroidDestroyedEvent ->
-					var asteroid = asteroidDestroyedEvent.asteroid()
-					score += asteroid.size == Size.LARGE ? 25 : asteroid.size == Size.MEDIUM ? 50 : 100
-					logger.debug('Score: {}', score)
-				}
-			}
-		}
+		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), ScoreScript))
 	}
 
 	/**
@@ -60,5 +53,33 @@ class Score extends Entity<Score> {
 	int getScore() {
 
 		return score
+	}
+
+	/**
+	 * Game script for tracking the player score.
+	 */
+	static class ScoreScript extends EntityScript<Score> {
+
+		@Override
+		void init() {
+
+			var scene = entity.scene as AsteroidsScene
+			scene.on(NodeAddedEvent) { nodeAddedEvent ->
+				var node = nodeAddedEvent.node()
+
+				if (node instanceof Asteroid) {
+					node.on(AsteroidDestroyedEvent) { asteroidDestroyedEvent ->
+						var asteroid = asteroidDestroyedEvent.asteroid()
+						entity.score += asteroid.size == Size.LARGE ? 25 : asteroid.size == Size.MEDIUM ? 50 : 100
+						logger.debug('Score: {}', entity.score)
+					}
+				}
+			}
+		}
+
+		// TODO: Make optional?
+		@Override
+		void update(float delta) {
+		}
 	}
 }

@@ -63,8 +63,8 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		addChild(camera)
 		addChild(player)
 		addChild(new AsteroidSpawner())
-		addChild(new Score(this))
-		addChild(new Lives(this, player))
+		addChild(new Score())
+		addChild(new Lives())
 	}
 
 	/**
