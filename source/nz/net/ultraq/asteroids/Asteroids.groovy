@@ -29,7 +29,6 @@ import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import picocli.CommandLine
 import picocli.CommandLine.Command
-import static org.lwjgl.glfw.GLFW.*
 
 /**
  * Entry point for the Asteroids game.
@@ -48,7 +47,7 @@ class Asteroids implements Runnable {
 	}
 
 	private Window window
-	private InputEventHandler inputEventHandler
+	private InputEventHandler input
 	private ResourceManager resourceManager
 	private ScriptEngine scriptEngine
 	private AsteroidsScene scene
@@ -63,14 +62,17 @@ class Asteroids implements Runnable {
 				.scaleToFit()
 				.withBackgroundColour(Colour.BLACK)
 				.withVSync(true)
-			inputEventHandler = new InputEventHandler()
+			input = new InputEventHandler()
 				.addInputSource(window)
+				.addEscapeToCloseBinding(window)
+				.addImGuiDebugBindings(window)
+				.addVSyncBinding(window)
 			resourceManager = new ResourceManager('nz/net/ultraq/asteroids/assets/')
 			scriptEngine = new ScriptEngine('.')
 
 			ScopedValue
 				.where(WINDOW, window)
-				.where(INPUT_EVENT_HANDLER, inputEventHandler)
+				.where(INPUT_EVENT_HANDLER, input)
 				.where(RESOURCE_MANAGER, resourceManager)
 				.where(SCRIPT_ENGINE, scriptEngine)
 				.run(() -> {
@@ -82,6 +84,7 @@ class Asteroids implements Runnable {
 							.withCursorTracking(scene.camera.camera, scene.camera.transform))
 						.addImGuiComponent(new NodeList(scene))
 						.show()
+					input.addInputBinding(new DebugBinding(scene, window))
 
 					// Game loop
 					var deltaTimer = new DeltaTimer()
@@ -89,15 +92,7 @@ class Asteroids implements Runnable {
 						var delta = deltaTimer.deltaTime()
 
 						// Logic/update
-						if (inputEventHandler.keyPressed(GLFW_KEY_ESCAPE, true)) {
-							window.shouldClose(true)
-						}
-						if (inputEventHandler.keyPressed(GLFW_KEY_I, true)) {
-							window.toggleImGuiWindows()
-						}
-						if (inputEventHandler.keyPressed(GLFW_KEY_V, true)) {
-							window.toggleVSync()
-						}
+						input.processInputs()
 						scene.update(delta)
 
 						// Render
