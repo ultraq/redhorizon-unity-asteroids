@@ -18,6 +18,7 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
+import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
@@ -34,6 +35,10 @@ import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
+
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 
 /**
  * The player spaceship.
@@ -69,6 +74,8 @@ class Player extends Entity<Player> {
 	static class PlayerScript extends EntityScript<Player> {
 
 		private final InputEventHandler input
+		private final ScheduledExecutorService executor
+		private AsteroidsScene scene
 		private SpriteComponent sprite
 		private CameraEntity camera
 		private Vector2f worldBoundsMin
@@ -94,12 +101,13 @@ class Player extends Entity<Player> {
 		PlayerScript() {
 
 			input = INPUT_EVENT_HANDLER.get()
+			executor = Executors.newSingleThreadScheduledExecutor()
 		}
 
 		@Override
 		void init() {
 
-			var scene = (AsteroidsScene)entity.scene
+			scene = entity.scene as AsteroidsScene
 			sprite = entity.findComponent { it instanceof SpriteComponent } as SpriteComponent
 			camera = scene.camera
 			var worldBounds = new Rectanglef().setMax(scene.WIDTH, scene.HEIGHT).center()
@@ -110,8 +118,29 @@ class Player extends Entity<Player> {
 		@Override
 		void onCollision(Circlef playerBounds, Entity otherEntity, Circlef otherBounds) {
 
-			if (otherEntity !instanceof Bullet) {
+			if (otherEntity instanceof Asteroid) {
 				logger.debug('The player collided with {}!', otherEntity.name)
+
+				scene.queueChange { ->
+					scene.removeChild(entity)
+					entity.transform.identity()
+					entity.findComponentByType(CollisionComponent).disable()
+					velocity.zero()
+
+					// Respawn after 3 seconds
+					executor.schedule({ ->
+						this.scene.queueChange { ->
+							this.scene.addChild(entity)
+						}
+					}, 3, TimeUnit.SECONDS)
+
+					// Enable collision after 5 seconds (2 seconds after respawn)
+					executor.schedule({ ->
+						this.scene.queueChange { ->
+							this.entity.findComponentByType(CollisionComponent).enable()
+						}
+					}, 5, TimeUnit.SECONDS)
+				}
 			}
 		}
 
@@ -180,8 +209,8 @@ class Player extends Entity<Player> {
 			firingCooldown -= delta
 
 			if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
-				(entity.scene as AsteroidsScene).queueChange { ->
-					entity.scene.addChild(new Bullet(entity.transform, velocity)
+				scene.queueChange { ->
+					scene.addChild(new Bullet(entity.transform, velocity)
 						.withName("Bullet ${bulletCount++}"))
 				}
 				firingCooldown = 0.25f

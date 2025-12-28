@@ -74,10 +74,16 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 			entity.findComponentsByType(CollisionComponent, collisionComponents)
 		}
 		for (var i = 0; i < collisionComponents.size(); i++) {
-			var component = collisionComponents.get(i)
+			var collision = collisionComponents.get(i)
+			if (!collision.enabled) {
+				continue
+			}
 			for (var j = i + 1; j < collisionComponents.size(); j++) {
-				var other = collisionComponents.get(j)
-				component.checkCollision(other)
+				var otherCollision = collisionComponents.get(j)
+				if (!otherCollision.enabled) {
+					continue
+				}
+				collision.checkCollision(otherCollision)
 			}
 		}
 	}

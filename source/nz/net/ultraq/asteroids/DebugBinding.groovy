@@ -80,33 +80,38 @@ class DebugBinding implements InputBinding {
 					scene.removeChild(gridLines)
 					gridLines.close()
 				}
+			}
+		}
 
-				// Remove collision outlines
-				scene.traverse(Entity) { Entity entity ->
-					var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
-					if (collisionOutline) {
+		// Manage collision outlines
+		scene.traverse(Entity) { Entity entity ->
+			var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
+			var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
+			if (debug) {
+				if (collision) {
+					if (collision.enabled) {
+						if (!collisionOutline) {
+							var radius = collision.radius
+							entity.addComponent(
+								new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
+								})
+									.withName(COLLISION_OUTLINE_NAME))
+						}
+					}
+					else if (collisionOutline) {
 						entity.removeComponent(collisionOutline)
 						collisionOutline.close()
 					}
 				}
 			}
-		}
-
-		// Add collision outlines
-		if (debug) {
-			scene.traverse(Entity) { Entity entity ->
-				var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
-				var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
-				if (collision && !collisionOutline) {
-					var radius = collision.radius
-					entity.addComponent(
-						new MeshComponent(Type.LINE_LOOP, new Vertex[]{
-							new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
-							new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
-							new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
-							new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
-						})
-							.withName(COLLISION_OUTLINE_NAME))
+			else {
+				if (collisionOutline) {
+					entity.removeComponent(collisionOutline)
+					collisionOutline.close()
 				}
 			}
 		}
