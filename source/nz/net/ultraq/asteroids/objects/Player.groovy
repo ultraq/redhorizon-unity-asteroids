@@ -20,6 +20,7 @@ import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
 import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.engine.EntityScript
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
@@ -45,7 +46,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Player extends Entity<Player> {
+class Player extends Entity<Player> implements EventTarget<Player> {
 
 	static final float maxThrustSpeed = 500f
 	static final float linearDrag = 1f
@@ -140,6 +141,8 @@ class Player extends Entity<Player> {
 							this.entity.findComponentByType(CollisionComponent).enable()
 						}
 					}, 5, TimeUnit.SECONDS)
+
+					entity.trigger(new PlayerDestroyedEvent(entity, otherEntity))
 				}
 			}
 		}

@@ -19,6 +19,7 @@ package nz.net.ultraq.asteroids.objects
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
 import nz.net.ultraq.asteroids.engine.EntityScript
+import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
@@ -40,7 +41,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class Asteroid extends Entity<Asteroid> {
+class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 
 	static final float baseSpeed = 100f
 	static int count = 1
@@ -129,6 +130,7 @@ class Asteroid extends Entity<Asteroid> {
 					entity.parent.removeChild(entity)
 					entity.close()
 				}
+				entity.trigger(new AsteroidDestroyedEvent(entity))
 			}
 		}
 

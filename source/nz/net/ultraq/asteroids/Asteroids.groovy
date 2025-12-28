@@ -48,9 +48,7 @@ class Asteroids implements Runnable {
 	}
 
 	private Window window
-	private InputEventHandler input
 	private ResourceManager resourceManager
-	private ScriptEngine scriptEngine
 	private AsteroidsScene scene
 
 	@Override
@@ -63,13 +61,13 @@ class Asteroids implements Runnable {
 				.scaleToFit()
 				.withBackgroundColour(Colour.BLACK)
 				.withVSync(true)
-			input = new InputEventHandler()
+			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
 				.addImGuiDebugBindings(window)
 				.addVSyncBinding(window)
 			resourceManager = new ResourceManager('nz/net/ultraq/asteroids/assets/')
-			scriptEngine = new ScriptEngine('.')
+			var scriptEngine = new ScriptEngine('.')
 
 			ScopedValue
 				.where(WINDOW, window)

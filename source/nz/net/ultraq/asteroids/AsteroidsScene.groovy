@@ -18,7 +18,9 @@ package nz.net.ultraq.asteroids
 
 import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
+import nz.net.ultraq.asteroids.objects.Lives
 import nz.net.ultraq.asteroids.objects.Player
+import nz.net.ultraq.asteroids.objects.Score
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
@@ -61,6 +63,8 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		addChild(camera)
 		addChild(player)
 		addChild(new AsteroidSpawner())
+		addChild(new Score(this))
+		addChild(new Lives(this, player))
 	}
 
 	/**
