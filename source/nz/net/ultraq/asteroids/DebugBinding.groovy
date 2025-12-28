@@ -47,6 +47,7 @@ import groovy.transform.TupleConstructor
 @TupleConstructor(defaults = false)
 class DebugBinding implements InputBinding {
 
+	private static final Colour LIGHT_GREY = new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f)
 	private static final String COLLISION_OUTLINE_NAME = 'Collision outline'
 
 	final AsteroidsScene scene
@@ -68,7 +69,7 @@ class DebugBinding implements InputBinding {
 			if (debug) {
 				if (!gridLines) {
 					scene.insertBefore(
-						new GridLinesEntity(new Rectanglef(0f, 0f, scene.WIDTH, scene.HEIGHT).center(), 50f, Colour.RED, Colour.GREY)
+						new GridLinesEntity(new Rectanglef(0f, 0f, scene.WIDTH, scene.HEIGHT).center(), 100f, LIGHT_GREY, Colour.GREY)
 							.withName('Grid lines'),
 						scene.player)
 				}
