@@ -19,6 +19,7 @@ package nz.net.ultraq.asteroids.engine
 import nz.net.ultraq.redhorizon.engine.Entity
 
 import org.joml.primitives.Circlef
+import org.joml.primitives.Rectanglef
 
 /**
  * @author Emanuel Rabina
@@ -37,5 +38,19 @@ abstract class EntityScript<T extends Entity> extends nz.net.ultraq.redhorizon.e
 	 *   Bounds of the collision object on the other entity.
 	 */
 	void onCollision(Circlef thisBounds, Entity otherEntity, Circlef otherBounds) {
+	}
+
+	/**
+	 * Called when a collision occurs between the entity this script is attached
+	 * to and another entity with a collision object.
+	 *
+	 * @param thisBounds
+	 *   Bounds of the collision object on this entity.
+	 * @param otherEntity
+	 *   The other entity that the collision object belongs to.
+	 * @param otherBounds
+	 *   Bounds of the collision object on the other entity.
+	 */
+	void onCollision(Rectanglef thisBounds, Entity otherEntity, Rectanglef otherBounds) {
 	}
 }
