@@ -17,9 +17,9 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
 import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
@@ -75,11 +75,6 @@ class Score extends Entity<Score> {
 					}
 				}
 			}
-		}
-
-		// TODO: Make optional?
-		@Override
-		void update(float delta) {
 		}
 	}
 }

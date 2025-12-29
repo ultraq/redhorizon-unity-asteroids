@@ -93,9 +93,5 @@ class Lives extends Entity<Lives> {
 				}
 			}
 		}
-
-		@Override
-		void update(float delta) {
-		}
 	}
 }

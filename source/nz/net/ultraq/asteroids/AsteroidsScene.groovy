@@ -16,8 +16,6 @@
 
 package nz.net.ultraq.asteroids
 
-import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
-import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
 import nz.net.ultraq.asteroids.objects.Lives
 import nz.net.ultraq.asteroids.objects.Player
@@ -26,6 +24,8 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
+import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type

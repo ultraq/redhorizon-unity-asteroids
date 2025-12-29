@@ -34,7 +34,7 @@ configure {
 				implementation 'ch.qos.logback:logback-classic:1.5.21'
 				implementation 'info.picocli:picocli:4.7.7'
 				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.3.0'
-				implementation 'nz.net.ultraq.groovy:joml-extensions:0.1.7'
+				implementation 'nz.net.ultraq.groovy:joml-extensions:0.1.8-SNAPSHOT'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-engine:0.41.2-SNAPSHOT'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-graphics:0.41.2-SNAPSHOT'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-input:0.41.2-SNAPSHOT'

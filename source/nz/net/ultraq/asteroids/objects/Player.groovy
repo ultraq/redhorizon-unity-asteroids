@@ -17,13 +17,13 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
-import nz.net.ultraq.asteroids.engine.CollisionComponent
-import nz.net.ultraq.asteroids.engine.EntityScript
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
+import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
+import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.input.InputEventHandler
@@ -31,7 +31,6 @@ import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.joml.Vector2f
 import org.joml.Vector3f
-import org.joml.primitives.Circlef
 import org.joml.primitives.Rectanglef
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -117,7 +116,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 		}
 
 		@Override
-		void onCollision(Circlef playerBounds, Entity otherEntity, Circlef otherBounds) {
+		void onCollision(Object playerBounds, Entity otherEntity, Object otherBounds) {
 
 			if (otherEntity instanceof Asteroid) {
 				logger.debug('The player collided with {}!', otherEntity.name)
