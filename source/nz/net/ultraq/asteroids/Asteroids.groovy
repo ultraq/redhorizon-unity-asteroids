@@ -28,6 +28,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
+import org.lwjgl.system.Configuration
 import picocli.CommandLine
 import picocli.CommandLine.Command
 
@@ -40,7 +41,7 @@ import picocli.CommandLine.Command
 class Asteroids implements Runnable {
 
 	static {
-		System.setProperty('org.lwjgl.system.stackSize', '10240')
+		Configuration.STACK_SIZE.set(10240)
 	}
 
 	static void main(String[] args) {
@@ -84,7 +85,10 @@ class Asteroids implements Runnable {
 						.addImGuiComponent(new NodeList(scene))
 						.addImGuiComponent(new LogPanel())
 						.show()
-					input.addInputBinding(new DebugBinding(scene, window))
+					var debugLinesBinding = new DebugLinesBinding(scene)
+					input
+						.addInputBinding(debugLinesBinding)
+						.addInputBinding(new DebugEverythingBinding(window, debugLinesBinding))
 
 					// Game loop
 					var deltaTimer = new DeltaTimer()

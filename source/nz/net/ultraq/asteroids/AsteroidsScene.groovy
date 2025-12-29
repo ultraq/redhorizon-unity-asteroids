@@ -16,6 +16,7 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.asteroids.engine.CircleCollisionComponent
 import nz.net.ultraq.asteroids.engine.CollisionComponent
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
 import nz.net.ultraq.asteroids.objects.Lives
@@ -24,11 +25,17 @@ import nz.net.ultraq.asteroids.objects.Score
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
+import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
+import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
+
+import org.joml.Vector3f
 
 /**
  * Scene setup for the Asteroids game.
@@ -42,6 +49,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 	final CameraEntity camera
 	final Player player
+	boolean showCollisionLines = false
 	private final Window window
 	private final BasicShader shader
 	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
@@ -152,6 +160,38 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		// TODO: Similar to the render method, these look like they should be the "S" part of ECS
 		gameLogicComponents.clear()
 		traverse(Entity) { Entity entity ->
+
+			// Manage collision outlines
+			var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
+			var collisionOutline = entity.findComponent { it.name == 'Collision outline' } as MeshComponent
+			if (showCollisionLines) {
+				if (collision) {
+					if (!collisionOutline) {
+						var radius = collision.radius
+						collisionOutline = entity.addAndReturnComponent(
+							new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+								new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
+								new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
+							})
+								.withName('Collision outline')
+						)
+					}
+					if (collision.enabled) {
+						collisionOutline.enable()
+					}
+					else {
+						collisionOutline.disable()
+					}
+				}
+			}
+			else {
+				if (collisionOutline) {
+					collisionOutline.disable()
+				}
+			}
+
 			entity.findComponentsByType(GameLogicComponent, gameLogicComponents)
 		}
 		gameLogicComponents.each { component ->

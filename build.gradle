@@ -20,7 +20,7 @@ plugins {
 }
 
 description = 'Using Red Horizon to build the Asteroids in Unity tutorial'
-version = '0.1.0'
+version = '0.1.1'
 
 configure {
 	createGroovyApplicationProject() {
@@ -35,11 +35,10 @@ configure {
 				implementation 'info.picocli:picocli:4.7.7'
 				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.3.0'
 				implementation 'nz.net.ultraq.groovy:joml-extensions:0.1.7'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-audio:0.41.1'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-engine:0.41.1'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-graphics:0.41.1'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-input:0.41.1'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-scenegraph:0.41.1'
+				implementation 'nz.net.ultraq.redhorizon:redhorizon-engine:0.41.2-SNAPSHOT'
+				implementation 'nz.net.ultraq.redhorizon:redhorizon-graphics:0.41.2-SNAPSHOT'
+				implementation 'nz.net.ultraq.redhorizon:redhorizon-input:0.41.2-SNAPSHOT'
+				implementation 'nz.net.ultraq.redhorizon:redhorizon-scenegraph:0.41.2-SNAPSHOT'
 				implementation 'org.apache.groovy:groovy:4.0.29'
 				implementation 'org.joml:joml:1.10.8'
 				implementation 'org.joml:joml-primitives:1.10.0'
