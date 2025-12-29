@@ -17,10 +17,11 @@
 plugins {
 	id 'idea'
 	id 'nz.net.ultraq.gradle.fluent-configuration' version '0.8.0'
+	id 'org.panteleyev.jpackageplugin' version '1.7.6'
 }
 
 description = 'Using Red Horizon to build the Asteroids in Unity tutorial'
-version = '0.1.0'
+version = '0.1.1'
 
 configure {
 	createGroovyApplicationProject() {
@@ -35,7 +36,6 @@ configure {
 				implementation 'info.picocli:picocli:4.7.7'
 				implementation 'nz.net.ultraq.groovy:groovy-extensions:3.3.0'
 				implementation 'nz.net.ultraq.groovy:joml-extensions:0.1.7'
-				implementation 'nz.net.ultraq.redhorizon:redhorizon-audio:0.41.1'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-engine:0.41.1'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-graphics:0.41.1'
 				implementation 'nz.net.ultraq.redhorizon:redhorizon-input:0.41.1'
@@ -53,4 +53,25 @@ configurations.configureEach {
 		cacheChangingModulesFor 0, 'seconds'
 		cacheDynamicVersionsFor 0, 'seconds'
 	}
+}
+
+tasks.register('copyDependencies', Copy) {
+	from configurations.runtimeClasspath
+	into layout.buildDirectory.dir('jpackage')
+}
+
+tasks.register('copyJar', Copy) {
+	from tasks.jar
+	into layout.buildDirectory.dir('jpackage')
+}
+
+jpackage {
+  dependsOn('build', 'copyDependencies', 'copyJar')
+
+  appName = 'Asteroids'
+  appVersion = project.version
+  destination = layout.buildDirectory.dir('application')
+  input = layout.buildDirectory.dir('jpackage')
+  mainJar = "${project.name}-${project.version}.jar"
+  mainClass = 'nz.net.ultraq.asteroids.Asteroids'
 }
