@@ -29,6 +29,7 @@ The current control scheme is:
  - The ship will rotate towards the mouse cursor, so use your mouse to steer
  - Press `W` to move towards the cursor
  - Use either `Space` or `Mouse button 1` to fire
+ - Press `Esc` to quit the game at any time
 
 Debug controls:
  - `I` to toggle debug information panels - a list of objects in the scene and
