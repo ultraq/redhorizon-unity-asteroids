@@ -20,10 +20,18 @@ import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.graphics.Image
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
+import imgui.ImFont
+import imgui.ImGui
+import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static imgui.flag.ImGuiStyleVar.*
+import static imgui.flag.ImGuiWindowFlags.*
 
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
@@ -34,18 +42,26 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Lives extends Entity<Lives> {
+class Lives extends Entity<Lives> implements ImGuiComponent {
 
 	private static final Logger logger = LoggerFactory.getLogger(Lives)
 
+	private final Image livesImage
+	private final ImFont squareFont
 	private int lives = 3
 
 	/**
 	 * Constructor, tie the lives to the player.
 	 */
-	Lives() {
+	Lives(ImFont squareFont) {
 
-		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), LivesScript))
+		this.squareFont = squareFont
+
+		var scriptEngine = SCRIPT_ENGINE.get()
+		var resourceManager = RESOURCE_MANAGER.get()
+
+		addComponent(new ScriptComponent(scriptEngine, LivesScript))
+		livesImage = resourceManager.loadImage('Lives.png')
 	}
 
 	/**
@@ -54,6 +70,26 @@ class Lives extends Entity<Lives> {
 	int getLives() {
 
 		return lives
+	}
+
+	@Override
+	void render() {
+
+		var viewport = ImGui.getMainViewport()
+		ImGui.setNextWindowBgAlpha(0.4f)
+		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY)
+		ImGui.pushFont(squareFont)
+		ImGui.pushStyleVar(WindowBorderSize, 0f)
+		ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+
+		ImGui.begin('Lives', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+		ImGui.image(((OpenGLTexture)livesImage.texture).textureId, livesImage.width / 4, livesImage.height / 4, 0f, 1f, 1f, 0f)
+		ImGui.sameLine()
+		ImGui.text("x ${lives}")
+
+		ImGui.popStyleVar(2)
+		ImGui.popFont()
+		ImGui.end()
 	}
 
 	/**

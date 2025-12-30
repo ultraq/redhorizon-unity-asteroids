@@ -21,29 +21,37 @@ import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
 import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
 
+import imgui.ImFont
+import imgui.ImGui
+import imgui.type.ImBoolean
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import static imgui.flag.ImGuiStyleVar.*
+import static imgui.flag.ImGuiWindowFlags.*
 
 /**
  * Track the player score.
  *
  * @author Emanuel Rabina
  */
-class Score extends Entity<Score> {
+class Score extends Entity<Score> implements ImGuiComponent {
 
 	private static final Logger logger = LoggerFactory.getLogger(Score)
 
+	private final ImFont squareFont
 	private int score = 0
 
 	/**
 	 * Constructor, tie a score component to the scene so we can know of changes
 	 * made to it.
 	 */
-	Score() {
+	Score(ImFont squareFont) {
 
+		this.squareFont = squareFont
 		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), ScoreScript))
 	}
 
@@ -53,6 +61,24 @@ class Score extends Entity<Score> {
 	int getScore() {
 
 		return score
+	}
+
+	@Override
+	void render() {
+
+		var viewport = ImGui.getMainViewport()
+		ImGui.setNextWindowBgAlpha(0.4f)
+		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY + 24 as float)
+		ImGui.pushFont(squareFont)
+		ImGui.pushStyleVar(WindowBorderSize, 0f)
+		ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+
+		ImGui.begin('Score', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+		ImGui.text(String.format('%,d', score))
+
+		ImGui.popStyleVar(2)
+		ImGui.popFont()
+		ImGui.end()
 	}
 
 	/**

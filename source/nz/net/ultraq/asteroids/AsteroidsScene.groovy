@@ -35,6 +35,8 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
 
+import imgui.ImFontConfig
+import imgui.ImGui
 import org.joml.Vector3f
 
 /**
@@ -71,8 +73,21 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		addChild(camera)
 		addChild(player)
 		addChild(new AsteroidSpawner())
-		addChild(new Score())
-		addChild(new Lives())
+
+		var io = ImGui.getIO()
+		var imFontConfig = new ImFontConfig()
+		var squareFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Square.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, imFontConfig)
+		}
+		imFontConfig.destroy()
+
+		var lives = new Lives(squareFont)
+		addChild(lives)
+		window.addImGuiComponent(lives) // TODO: Make ImGuiComponents like ECS ones
+
+		var score = new Score(squareFont)
+		addChild(score)
+		window.addImGuiComponent(score)
 	}
 
 	/**
