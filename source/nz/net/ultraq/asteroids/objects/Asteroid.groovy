@@ -19,7 +19,6 @@ package nz.net.ultraq.asteroids.objects
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
@@ -84,8 +83,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 	 */
 	static class AsteroidScript extends EntityScript<Asteroid> {
 
-		private CameraEntity camera
-		private Matrix4f expandedViewProjection = new Matrix4f()
+		private AsteroidsScene scene
 		private FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private boolean visible = false
 		private Vector2f splitPosition1 = new Vector2f()
@@ -96,7 +94,8 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 		@Override
 		void init() {
 
-			camera = ((AsteroidsScene)entity.scene).camera
+			scene = entity.scene as AsteroidsScene
+			frustumIntersection.set(scene.camera.viewProjection.scale(0.8f, new Matrix4f()), false)
 		}
 
 		@Override
@@ -136,12 +135,11 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 		@Override
 		void update(float delta) {
 
-			// Track visibility to know when to remove the object
-			frustumIntersection.set(expandedViewProjection.set(camera.viewProjection).scale(0.8f), false)
+			// Remove asteroids that have left the playing field
 			var lastVisible = visible
 			var nowVisible = frustumIntersection.testPoint(entity.position)
 			if (lastVisible && !nowVisible) {
-				(entity.scene as AsteroidsScene).queueChange { ->
+				scene.queueChange { ->
 					entity.parent.removeChild(entity)
 					entity.close()
 				}
