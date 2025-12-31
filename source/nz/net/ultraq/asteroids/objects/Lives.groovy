@@ -18,10 +18,12 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Image
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
@@ -42,12 +44,10 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Lives extends Entity<Lives> implements ImGuiComponent {
+class Lives extends Entity<Lives> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Lives)
 
-	private final Image livesImage
-	private final ImFont squareFont
 	private int lives = 3
 
 	/**
@@ -55,13 +55,8 @@ class Lives extends Entity<Lives> implements ImGuiComponent {
 	 */
 	Lives(ImFont squareFont) {
 
-		this.squareFont = squareFont
-
-		var scriptEngine = SCRIPT_ENGINE.get()
-		var resourceManager = RESOURCE_MANAGER.get()
-
-		addComponent(new ScriptComponent(scriptEngine, LivesScript))
-		livesImage = resourceManager.loadImage('Lives.png')
+		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), LivesScript))
+		addComponent(new LivesUiComponent(squareFont))
 	}
 
 	/**
@@ -70,26 +65,6 @@ class Lives extends Entity<Lives> implements ImGuiComponent {
 	int getLives() {
 
 		return lives
-	}
-
-	@Override
-	void render() {
-
-		var viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY)
-		ImGui.pushFont(squareFont)
-		ImGui.pushStyleVar(WindowBorderSize, 0f)
-		ImGui.pushStyleVar(WindowPadding, 8f, 4f)
-
-		ImGui.begin('Lives', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-		ImGui.image(((OpenGLTexture)livesImage.texture).textureId, livesImage.width / 4, livesImage.height / 4, 0f, 1f, 1f, 0f)
-		ImGui.sameLine()
-		ImGui.text("x ${lives}")
-
-		ImGui.popStyleVar(2)
-		ImGui.popFont()
-		ImGui.end()
 	}
 
 	/**
@@ -128,6 +103,44 @@ class Lives extends Entity<Lives> implements ImGuiComponent {
 					}, 1, TimeUnit.SECONDS)
 				}
 			}
+		}
+	}
+
+	/**
+	 * Component for rendering the number of lives remaining to the UI.
+	 */
+	static class LivesUiComponent extends ImGuiComponent<LivesUiComponent> {
+
+		private final ImFont squareFont
+		private final Image livesImage
+		private final Window window
+
+		LivesUiComponent(ImFont squareFont) {
+
+			this.squareFont = squareFont
+			this.window = WINDOW.get()
+			var resourceManager = RESOURCE_MANAGER.get()
+			livesImage = resourceManager.loadImage('Lives.png')
+		}
+
+		@Override
+		void render(ImGuiContext context) {
+
+			var viewport = window.viewport
+			ImGui.setNextWindowBgAlpha(0.4f)
+			ImGui.setNextWindowPos(viewport.minX / 2, viewport.minY)
+			ImGui.pushFont(squareFont)
+			ImGui.pushStyleVar(WindowBorderSize, 0f)
+			ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+
+			ImGui.begin('Lives', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+			ImGui.image(((OpenGLTexture)livesImage.texture).textureId, livesImage.width / 4, livesImage.height / 4, 0f, 1f, 1f, 0f)
+			ImGui.sameLine()
+			ImGui.text("x ${((Lives)entity).lives}")
+
+			ImGui.popStyleVar(2)
+			ImGui.popFont()
+			ImGui.end()
 		}
 	}
 }

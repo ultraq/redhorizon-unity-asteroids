@@ -16,14 +16,11 @@
 
 package nz.net.ultraq.asteroids
 
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.*
@@ -65,7 +62,6 @@ class Asteroids implements Runnable {
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
-				.addImGuiDebugBindings(window)
 				.addVSyncBinding(window)
 			resourceManager = new ResourceManager('nz/net/ultraq/asteroids/assets/')
 			var scriptEngine = new ScriptEngine('.')
@@ -79,16 +75,7 @@ class Asteroids implements Runnable {
 
 					// Init scene
 					scene = new AsteroidsScene()
-					window
-						.addImGuiComponent(new DebugOverlay()
-							.withCursorTracking(scene.camera.camera, scene.camera.transform))
-						.addImGuiComponent(new NodeList(scene))
-						.addImGuiComponent(new LogPanel())
-						.show()
-					var debugLinesBinding = new DebugLinesBinding(scene)
-					input
-						.addInputBinding(debugLinesBinding)
-						.addInputBinding(new DebugEverythingBinding(window, debugLinesBinding))
+					window.show()
 
 					// Game loop
 					var deltaTimer = new DeltaTimer()

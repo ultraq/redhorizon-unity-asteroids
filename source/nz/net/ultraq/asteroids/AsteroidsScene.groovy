@@ -24,16 +24,23 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugComponent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
 import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.asteroids.ScopedValues.getWINDOW
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import imgui.ImFontConfig
 import imgui.ImGui
@@ -54,9 +61,11 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	boolean showCollisionLines = false
 	private final Window window
 	private final BasicShader shader
+	private Framebuffer framebuffer
 	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
 	private final List<GameLogicComponent> gameLogicComponents = new ArrayList<>()
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
+	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
 	private final Queue<Closure> changeQueue = new ArrayDeque<>()
 
 	/**
@@ -65,11 +74,11 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	AsteroidsScene() {
 
 		window = WINDOW.get()
+		framebuffer = new OpenGLFramebuffer(WIDTH, HEIGHT)
+		shader = new BasicShader()
 
 		camera = new CameraEntity(WIDTH, HEIGHT, window)
-		shader = new BasicShader()
 		player = new Player()
-
 		addChild(camera)
 		addChild(player)
 		addChild(new AsteroidSpawner())
@@ -81,13 +90,27 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		}
 		imFontConfig.destroy()
 
-		var lives = new Lives(squareFont)
-		addChild(lives)
-		window.addImGuiComponent(lives) // TODO: Make ImGuiComponents like ECS ones
+		addChild(new Lives(squareFont))
+		addChild(new Score(squareFont))
 
-		var score = new Score(squareFont)
-		addChild(score)
-		window.addImGuiComponent(score)
+		var debugOverlayComponent = new ImGuiDebugComponent(new DebugOverlay()
+			.withCursorTracking(camera.camera, camera.transform, window)).disable()
+		var nodeListComponent = new ImGuiDebugComponent(new NodeList(this)).disable()
+		var logPanelComponent = new ImGuiDebugComponent(new LogPanel()).disable()
+		addChild(new Entity()
+			.addComponent(debugOverlayComponent)
+			.addComponent(nodeListComponent)
+			.addComponent(logPanelComponent)
+			.withName('Debug UI'))
+
+		var debugLinesBinding = new DebugLinesBinding(this)
+		var debugEverythingBinding = new DebugEverythingBinding(
+			[debugOverlayComponent, nodeListComponent, logPanelComponent], debugLinesBinding)
+		var inputEventHandler = INPUT_EVENT_HANDLER.get()
+		inputEventHandler
+			.addImGuiDebugBindings([debugOverlayComponent], [nodeListComponent, logPanelComponent])
+			.addInputBinding(debugLinesBinding)
+			.addInputBinding(debugEverythingBinding)
 	}
 
 	/**
@@ -151,20 +174,34 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 
 		// TODO: Similar to the update method, these look like they should be the "S" part of ECS
 		graphicsComponents.clear()
+		imguiComponents.clear()
 		traverse(Entity) { Entity entity ->
 			entity.findComponentsByType(GraphicsComponent, graphicsComponents)
+			entity.findComponentsByType(ImGuiComponent, imguiComponents)
 		}
 
-		window.useWindow { ->
-			shader.useShader { shaderContext ->
-				camera.render(shaderContext)
-				graphicsComponents.each { component ->
+		window.useRenderPipeline()
+			.scene { ->
+				framebuffer.useFramebuffer { ->
+					shader.useShader { shaderContext ->
+						camera.render(shaderContext)
+						graphicsComponents.each { component ->
+							if (component.enabled) {
+								component.render(shaderContext)
+							}
+						}
+					}
+				}
+				return framebuffer
+			}
+			.ui(true) { context ->
+				imguiComponents.each { component ->
 					if (component.enabled) {
-						component.render(shaderContext)
+						component.render(context)
 					}
 				}
 			}
-		}
+			.end()
 	}
 
 	/**

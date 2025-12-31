@@ -16,7 +16,7 @@
 
 package nz.net.ultraq.asteroids
 
-import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
@@ -35,11 +35,17 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
 class DebugEverythingBinding extends KeyBinding {
 
-	DebugEverythingBinding(Window window, DebugLinesBinding debugLinesBinding) {
+	DebugEverythingBinding(List<ImGuiComponent> debugWindows, DebugLinesBinding debugLinesBinding) {
 
 		super(GLFW_KEY_P, true, { ->
-			window.toggleImGuiDebugWindows()
-			window.toggleImGuiDebugOverlays()
+			debugWindows.each { window ->
+				if (window.enabled) {
+					window.disable()
+				}
+				else {
+					window.enable()
+				}
+			}
 			debugLinesBinding.action()
 		})
 	}

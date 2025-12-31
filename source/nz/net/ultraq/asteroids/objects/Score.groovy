@@ -19,11 +19,13 @@ package nz.net.ultraq.asteroids.objects
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
-import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
+import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import imgui.ImFont
 import imgui.ImGui
@@ -38,11 +40,10 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class Score extends Entity<Score> implements ImGuiComponent {
+class Score extends Entity<Score> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Score)
 
-	private final ImFont squareFont
 	private int score = 0
 
 	/**
@@ -51,8 +52,8 @@ class Score extends Entity<Score> implements ImGuiComponent {
 	 */
 	Score(ImFont squareFont) {
 
-		this.squareFont = squareFont
 		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), ScoreScript))
+		addComponent(new ScoreUiComponent(squareFont))
 	}
 
 	/**
@@ -61,24 +62,6 @@ class Score extends Entity<Score> implements ImGuiComponent {
 	int getScore() {
 
 		return score
-	}
-
-	@Override
-	void render() {
-
-		var viewport = ImGui.getMainViewport()
-		ImGui.setNextWindowBgAlpha(0.4f)
-		ImGui.setNextWindowPos(viewport.workPosX, viewport.workPosY + 24 as float)
-		ImGui.pushFont(squareFont)
-		ImGui.pushStyleVar(WindowBorderSize, 0f)
-		ImGui.pushStyleVar(WindowPadding, 8f, 4f)
-
-		ImGui.begin('Score', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-		ImGui.text(String.format('%,d', score))
-
-		ImGui.popStyleVar(2)
-		ImGui.popFont()
-		ImGui.end()
 	}
 
 	/**
@@ -101,6 +84,39 @@ class Score extends Entity<Score> implements ImGuiComponent {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * UI component for displaying the player's score.
+	 */
+	static class ScoreUiComponent extends ImGuiComponent<ScoreUiComponent> {
+
+		private final ImFont squareFont
+		private final Window window
+
+		ScoreUiComponent(ImFont squareFont) {
+
+			this.squareFont = squareFont
+			this.window = WINDOW.get()
+		}
+
+		@Override
+		void render(ImGuiContext context) {
+
+			var viewport = window.viewport
+			ImGui.setNextWindowBgAlpha(0.4f)
+			ImGui.setNextWindowPos(viewport.minX / 2, viewport.minY + 24 as float)
+			ImGui.pushFont(squareFont)
+			ImGui.pushStyleVar(WindowBorderSize, 0f)
+			ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+
+			ImGui.begin('Score', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+			ImGui.text(String.format('%,d', ((Score)entity).score))
+
+			ImGui.popStyleVar(2)
+			ImGui.popFont()
+			ImGui.end()
 		}
 	}
 }
