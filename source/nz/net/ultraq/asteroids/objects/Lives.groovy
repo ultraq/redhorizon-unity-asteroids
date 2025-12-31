@@ -128,13 +128,16 @@ class Lives extends Entity<Lives> {
 
 			var viewport = window.viewport
 			ImGui.setNextWindowBgAlpha(0.4f)
-			ImGui.setNextWindowPos(viewport.minX / 2, viewport.minY)
+			ImGui.setNextWindowPos(viewport.minX, viewport.minY)
 			ImGui.pushFont(squareFont)
 			ImGui.pushStyleVar(WindowBorderSize, 0f)
-			ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+			ImGui.pushStyleVar(WindowPadding, 8 * context.uiScale as float, 4 * context.uiScale as float)
 
 			ImGui.begin('Lives', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-			ImGui.image(((OpenGLTexture)livesImage.texture).textureId, livesImage.width / 4, livesImage.height / 4, 0f, 1f, 1f, 0f)
+			ImGui.image(((OpenGLTexture)livesImage.texture).textureId,
+				livesImage.width / (4 / context.uiScale) as float,
+				livesImage.height / (4 / context.uiScale) as float,
+				0f, 1f, 1f, 0f)
 			ImGui.sameLine()
 			ImGui.text("x ${((Lives)entity).lives}")
 

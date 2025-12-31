@@ -86,7 +86,7 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 		var io = ImGui.getIO()
 		var imFontConfig = new ImFontConfig()
 		var squareFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Square.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16, imFontConfig)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * (window.contentScale / window.renderScale) as float, imFontConfig)
 		}
 		imFontConfig.destroy()
 

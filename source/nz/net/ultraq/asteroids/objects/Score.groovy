@@ -106,10 +106,12 @@ class Score extends Entity<Score> {
 
 			var viewport = window.viewport
 			ImGui.setNextWindowBgAlpha(0.4f)
-			ImGui.setNextWindowPos(viewport.minX / 2, viewport.minY + 24 as float)
+			ImGui.setNextWindowPos(
+				viewport.minX,
+				viewport.minY + (24 * context.uiScale) as float)
 			ImGui.pushFont(squareFont)
 			ImGui.pushStyleVar(WindowBorderSize, 0f)
-			ImGui.pushStyleVar(WindowPadding, 8f, 4f)
+			ImGui.pushStyleVar(WindowPadding, 8 * context.uiScale as float, 4 * context.uiScale as float)
 
 			ImGui.begin('Score', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
 			ImGui.text(String.format('%,d', ((Score)entity).score))
