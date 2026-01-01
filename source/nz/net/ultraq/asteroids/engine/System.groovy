@@ -48,6 +48,22 @@ abstract class System {
 	}
 
 	/**
+	 * Return whether this system is disabled.
+	 */
+	boolean isDisabled() {
+
+		return !enabled
+	}
+
+	/**
+	 * Return whether this system is enabled.
+	 */
+	boolean isEnabled() {
+
+		return enabled
+	}
+
+	/**
 	 * Perform the role of the system over the given scene.
 	 *
 	 * @param scene
