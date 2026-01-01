@@ -82,9 +82,9 @@ class Lives extends Entity<Lives> {
 
 				if (!entity.lives) {
 					logger.debug('Game over!')
-					scene.queueChange { ->
-						scene.clear()
-					}
+					// TODO: Game over
+//					scene.queueChange { ->
+//					}
 					scene.scheduleChange(1, TimeUnit.SECONDS) { ->
 						window.shouldClose(true)
 					}

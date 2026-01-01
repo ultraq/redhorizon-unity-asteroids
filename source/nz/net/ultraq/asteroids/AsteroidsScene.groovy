@@ -22,29 +22,16 @@ import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.asteroids.objects.Score
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.GraphicsComponent
-import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugComponent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
-import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
-import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
-import nz.net.ultraq.redhorizon.engine.scripts.GameLogicComponent
-import nz.net.ultraq.redhorizon.graphics.Colour
-import nz.net.ultraq.redhorizon.graphics.Framebuffer
-import nz.net.ultraq.redhorizon.graphics.Mesh.Type
-import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import imgui.ImFontConfig
 import imgui.ImGui
-import org.joml.Vector3f
 
 /**
  * Scene setup for the Asteroids game.
@@ -60,12 +47,6 @@ class AsteroidsScene extends Scene {
 	final Player player
 	boolean showCollisionLines = false
 	private final Window window
-	private final BasicShader shader
-	private Framebuffer framebuffer
-	private final List<CollisionComponent> collisionComponents = new ArrayList<>()
-	private final List<GameLogicComponent> gameLogicComponents = new ArrayList<>()
-	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
-	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
 
 	/**
 	 * Constructor, create a new scene to the given dimensions.
@@ -73,8 +54,6 @@ class AsteroidsScene extends Scene {
 	AsteroidsScene() {
 
 		window = WINDOW.get()
-		framebuffer = new OpenGLFramebuffer(WIDTH, HEIGHT)
-		shader = new BasicShader()
 
 		camera = new CameraEntity(WIDTH, HEIGHT, window)
 		player = new Player()
@@ -110,116 +89,5 @@ class AsteroidsScene extends Scene {
 			.addImGuiDebugBindings([debugOverlayComponent], [nodeListComponent, logPanelComponent])
 			.addInputBinding(debugLinesBinding)
 			.addInputBinding(debugEverythingBinding)
-	}
-
-	/**
-	 * Perform collision checks between all entities in the scene.
-	 */
-	void checkCollisions() {
-
-		// TODO: Yet another ECS system part
-		collisionComponents.clear()
-		traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(CollisionComponent, collisionComponents)
-		}
-		for (var i = 0; i < collisionComponents.size(); i++) {
-			var collision = collisionComponents.get(i)
-			if (!collision.enabled) {
-				continue
-			}
-			for (var j = i + 1; j < collisionComponents.size(); j++) {
-				var otherCollision = collisionComponents.get(j)
-				if (!otherCollision.enabled) {
-					continue
-				}
-				collision.checkCollision(otherCollision)
-			}
-		}
-	}
-
-	/**
-	 * Draw out all the graphical components of the scene.
-	 */
-	void render() {
-
-		// TODO: Similar to the update method, these look like they should be the "S" part of ECS
-		graphicsComponents.clear()
-		imguiComponents.clear()
-		traverse(Entity) { Entity entity ->
-			entity.findComponentsByType(GraphicsComponent, graphicsComponents)
-			entity.findComponentsByType(ImGuiComponent, imguiComponents)
-		}
-
-		window.useRenderPipeline()
-			.scene { ->
-				framebuffer.useFramebuffer { ->
-					shader.useShader { shaderContext ->
-						camera.render(shaderContext)
-						graphicsComponents.each { component ->
-							if (component.enabled) {
-								component.render(shaderContext)
-							}
-						}
-					}
-				}
-				return framebuffer
-			}
-			.ui(true) { context ->
-				imguiComponents.each { component ->
-					if (component.enabled) {
-						component.render(context)
-					}
-				}
-			}
-			.end()
-	}
-
-	/**
-	 * Perform a scene update in the game loop.
-	 */
-	void update(float delta) {
-
-		// TODO: Similar to the render method, these look like they should be the "S" part of ECS
-		gameLogicComponents.clear()
-		traverse(Entity) { Entity entity ->
-
-			// Manage collision outlines
-			var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
-			var collisionOutline = entity.findComponent { it.name == 'Collision outline' } as MeshComponent
-			if (showCollisionLines) {
-				if (collision) {
-					if (!collisionOutline) {
-						var radius = collision.radius
-						collisionOutline = entity.addAndReturnComponent(
-							new MeshComponent(Type.LINE_LOOP, new Vertex[]{
-								new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
-							})
-								.withName('Collision outline')
-						)
-					}
-					if (collision.enabled) {
-						collisionOutline.enable()
-					}
-					else {
-						collisionOutline.disable()
-					}
-				}
-			}
-			else {
-				if (collisionOutline) {
-					collisionOutline.disable()
-				}
-			}
-
-			entity.findComponentsByType(GameLogicComponent, gameLogicComponents)
-		}
-		gameLogicComponents.each { component ->
-			if (component.enabled) {
-				component.update(delta)
-			}
-		}
 	}
 }

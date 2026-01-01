@@ -16,11 +16,21 @@
 
 package nz.net.ultraq.asteroids
 
+import nz.net.ultraq.asteroids.engine.CollisionSystem
+import nz.net.ultraq.asteroids.engine.DebugCollisionOutlineSystem
+import nz.net.ultraq.asteroids.engine.Engine
+import nz.net.ultraq.asteroids.engine.GraphicsSystem
+import nz.net.ultraq.asteroids.engine.InputSystem
+import nz.net.ultraq.asteroids.engine.SceneChangesSystem
+import nz.net.ultraq.asteroids.engine.ScriptSystem
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptEngine
 import nz.net.ultraq.redhorizon.engine.utilities.DeltaTimer
 import nz.net.ultraq.redhorizon.engine.utilities.ResourceManager
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.Framebuffer
 import nz.net.ultraq.redhorizon.graphics.Window
+import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
 import static nz.net.ultraq.asteroids.ScopedValues.*
@@ -46,6 +56,8 @@ class Asteroids implements Runnable {
 	}
 
 	private Window window
+	private Framebuffer framebuffer
+	private BasicShader shader
 	private ResourceManager resourceManager
 	private AsteroidsScene scene
 
@@ -59,6 +71,8 @@ class Asteroids implements Runnable {
 				.scaleToFit()
 				.withBackgroundColour(Colour.BLACK)
 				.withVSync(true)
+			framebuffer = new OpenGLFramebuffer(AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT)
+			shader = new BasicShader()
 			var input = new InputEventHandler()
 				.addInputSource(window)
 				.addEscapeToCloseBinding(window)
@@ -73,23 +87,22 @@ class Asteroids implements Runnable {
 				.where(SCRIPT_ENGINE, scriptEngine)
 				.run(() -> {
 
-					// Init scene
+					// Init scene and systems
 					scene = new AsteroidsScene()
-					window.show()
+					var engine = new Engine()
+						.addSystem(new InputSystem(input))
+						.addSystem(new DebugCollisionOutlineSystem())
+						.addSystem(new ScriptSystem())
+						.addSystem(new CollisionSystem())
+						.addSystem(new GraphicsSystem(window, framebuffer, shader))
+						.addSystem(new SceneChangesSystem())
+						.withScene(scene)
 
 					// Game loop
+					window.show()
 					var deltaTimer = new DeltaTimer()
 					while (!window.shouldClose()) {
-						var delta = deltaTimer.deltaTime()
-
-						// TODO: Each of these parts look like the "S" part of an ECS, so
-						//       should be split as such.
-						input.processInputs()
-						scene.update(delta)
-						scene.checkCollisions()
-						scene.render()
-						scene.processQueuedChanges()
-
+						engine.update(deltaTimer.deltaTime())
 						Thread.yield()
 					}
 				})
@@ -97,6 +110,8 @@ class Asteroids implements Runnable {
 		finally {
 			scene?.close()
 			resourceManager?.close()
+			shader?.close()
+			framebuffer?.close()
 			window?.close()
 		}
 	}
