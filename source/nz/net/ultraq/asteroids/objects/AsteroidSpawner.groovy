@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
@@ -59,18 +58,11 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 		private static float maxSpawnRate = 1f
 		private static float spawnRateIncreaseInterval = 10f
 
-		private AsteroidsScene scene
 		private float spawnRate = minSpawnRate
 		private float spawnTimer = 0f
 		private float spawnRateIncreaseTimer = 0f
 		private Vector2f spawnPoint = new Vector2f()
 		private Vector2f headingCenter = new Vector2f()
-
-		@Override
-		void init() {
-
-			scene = (AsteroidsScene)entity.scene
-		}
 
 		@Override
 		void update(float delta) {
@@ -81,6 +73,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 			// the visible area.  This asteroid is then rotated towards the center
 			// with a little variance so that it flies back towards the play area.
 			if (spawnTimer >= spawnRate) {
+				var scene = entity.scene
 				var spawnAngle = Math.random() * 2 * Math.PI
 				spawnPoint.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float).mul(scene.WIDTH / 1.8f as float)
 				headingCenter.set(spawnPoint).mul(-1f)

@@ -43,7 +43,8 @@ class DebugLinesBinding extends KeyBinding {
 			if (enabled) {
 				if (!gridLines) {
 					scene.insertBefore(
-						new GridLinesEntity(new Rectanglef(0f, 0f, scene.WIDTH, scene.HEIGHT).center(), 100f, LIGHT_GREY, Colour.GREY)
+						new GridLinesEntity(new Rectanglef(0f, 0f, AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center(), 100f,
+							LIGHT_GREY, Colour.GREY)
 							.withName('Grid lines'),
 						scene.player)
 				}

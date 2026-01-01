@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
@@ -73,7 +72,7 @@ class Bullet extends Entity<Bullet> {
 
 			if (otherEntity instanceof Asteroid && !queuedForRemoval) {
 				logger.debug('Bullet collided with {} - removing from scene', otherEntity.name)
-				(entity.scene as AsteroidsScene).queueChange { ->
+				entity.scene.queueChange { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}
@@ -88,7 +87,7 @@ class Bullet extends Entity<Bullet> {
 
 			// Destroy bullet if it reaches the max lifetime
 			if (bulletTimer > bulletLifetime && !queuedForRemoval) {
-				(entity.scene as AsteroidsScene).queueChange { ->
+				entity.scene.queueChange { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}

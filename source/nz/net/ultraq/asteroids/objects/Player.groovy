@@ -36,8 +36,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import static org.lwjgl.glfw.GLFW.*
 
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /**
@@ -74,9 +72,6 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 	static class PlayerScript extends EntityScript<Player> {
 
 		private final InputEventHandler input
-		private final ScheduledExecutorService executor
-		private AsteroidsScene scene
-		private SpriteComponent sprite
 		private CameraEntity camera
 		private Vector2f worldBoundsMin
 		private Vector2f worldBoundsMax
@@ -101,16 +96,13 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 		PlayerScript() {
 
 			input = INPUT_EVENT_HANDLER.get()
-			executor = Executors.newSingleThreadScheduledExecutor()
 		}
 
 		@Override
 		void init() {
 
-			scene = entity.scene as AsteroidsScene
-			sprite = entity.findComponent { it instanceof SpriteComponent } as SpriteComponent
-			camera = scene.camera
-			var worldBounds = new Rectanglef().setMax(scene.WIDTH, scene.HEIGHT).center()
+			camera = entity.scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+			var worldBounds = new Rectanglef().setMax(AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center()
 			worldBoundsMin = worldBounds.getMin(new Vector2f())
 			worldBoundsMax = worldBounds.getMax(new Vector2f())
 		}
@@ -120,6 +112,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 			if (otherEntity instanceof Asteroid) {
 				logger.debug('The player collided with {}!', otherEntity.name)
+				var scene = entity.scene
 
 				scene.queueChange { ->
 					scene.removeChild(entity)
@@ -128,18 +121,14 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 					velocity.zero()
 
 					// Respawn after 3 seconds
-					executor.schedule({ ->
-						this.scene.queueChange { ->
-							this.scene.addChild(entity)
-						}
-					}, 3, TimeUnit.SECONDS)
+					scene.scheduleChange(3, TimeUnit.SECONDS) { ->
+						scene.addChild(entity)
+					}
 
 					// Enable collision after 5 seconds (2 seconds after respawn)
-					executor.schedule({ ->
-						this.scene.queueChange { ->
-							this.entity.findComponentByType(CollisionComponent).enable()
-						}
-					}, 5, TimeUnit.SECONDS)
+					scene.scheduleChange(5, TimeUnit.SECONDS) { ->
+						entity.findComponentByType(CollisionComponent).enable()
+					}
 
 					entity.trigger(new PlayerDestroyedEvent(entity, otherEntity))
 				}
@@ -149,7 +138,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 		@Override
 		void update(float delta) {
 
-			updateHeading(delta)
+			updateHeading()
 			updateMovement(delta)
 			updateShooting(delta)
 		}
@@ -157,9 +146,9 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 		/**
 		 * Keep the player pointed at the cursor.
 		 */
-		private void updateHeading(float delta) {
+		private void updateHeading() {
 
-			// Update sprite to look at the cursor
+			// Update rotation so the sprite will appear to look at the cursor
 			var cursorPosition = input.cursorPosition()
 			if (cursorPosition) {
 				positionXY.set(entity.position)
@@ -211,6 +200,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 			firingCooldown -= delta
 
 			if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
+				var scene = entity.scene
 				scene.queueChange { ->
 					scene.addChild(new Bullet(entity.transform, velocity)
 						.withName("Bullet ${bulletCount++}"))

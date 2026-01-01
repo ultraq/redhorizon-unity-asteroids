@@ -16,9 +16,9 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.eventhorizon.EventTarget
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
 import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
@@ -83,7 +83,6 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 	 */
 	static class AsteroidScript extends EntityScript<Asteroid> {
 
-		private AsteroidsScene scene
 		private FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private boolean visible = false
 		private Vector2f splitPosition1 = new Vector2f()
@@ -94,15 +93,15 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 		@Override
 		void init() {
 
-			scene = entity.scene as AsteroidsScene
-			frustumIntersection.set(scene.camera.viewProjection.scale(0.8f, new Matrix4f()), false)
+			var camera = entity.scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+			frustumIntersection.set(camera.viewProjection.scale(0.8f, new Matrix4f()), false)
 		}
 
 		@Override
 		void onCollision(Object asteroidBounds, Entity otherEntity, Object otherBounds) {
 
 			if (otherEntity instanceof Bullet) {
-				var scene = entity.scene as AsteroidsScene
+				var scene = entity.scene
 
 				if (entity.size == Size.LARGE || entity.size == Size.MEDIUM) {
 					logger.debug('{} collided with bullet - splitting', entity.name)
@@ -139,7 +138,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 			var lastVisible = visible
 			var nowVisible = frustumIntersection.testPoint(entity.position)
 			if (lastVisible && !nowVisible) {
-				scene.queueChange { ->
+				entity.scene.queueChange { ->
 					entity.parent.removeChild(entity)
 					entity.close()
 				}

@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
 /**
@@ -70,20 +68,10 @@ class Lives extends Entity<Lives> {
 	/**
 	 * Script for tracking player lives.
 	 */
-	static class LivesScript extends EntityScript<Lives> implements AutoCloseable {
-
-		private ScheduledExecutorService executor
-
-		@Override
-		void close() {
-
-			executor.shutdown()
-		}
+	static class LivesScript extends EntityScript<Lives> {
 
 		@Override
 		void init() {
-
-			executor = Executors.newSingleThreadScheduledExecutor()
 
 			var window = WINDOW.get()
 			var scene = entity.scene as AsteroidsScene
@@ -97,10 +85,9 @@ class Lives extends Entity<Lives> {
 					scene.queueChange { ->
 						scene.clear()
 					}
-
-					executor.schedule({ ->
+					scene.scheduleChange(1, TimeUnit.SECONDS) { ->
 						window.shouldClose(true)
-					}, 1, TimeUnit.SECONDS)
+					}
 				}
 			}
 		}

@@ -16,7 +16,6 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
@@ -72,10 +71,8 @@ class Score extends Entity<Score> {
 		@Override
 		void init() {
 
-			var scene = entity.scene as AsteroidsScene
-			scene.on(NodeAddedEvent) { nodeAddedEvent ->
+			entity.scene.on(NodeAddedEvent) { nodeAddedEvent ->
 				var node = nodeAddedEvent.node()
-
 				if (node instanceof Asteroid) {
 					node.on(AsteroidDestroyedEvent) { asteroidDestroyedEvent ->
 						var asteroid = asteroidDestroyedEvent.asteroid()

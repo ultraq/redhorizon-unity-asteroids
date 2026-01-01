@@ -51,7 +51,7 @@ import org.joml.Vector3f
  *
  * @author Emanuel Rabina
  */
-class AsteroidsScene extends Scene implements AutoCloseable {
+class AsteroidsScene extends Scene {
 
 	static final int WIDTH = 1920
 	static final int HEIGHT = 1440
@@ -66,7 +66,6 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 	private final List<GameLogicComponent> gameLogicComponents = new ArrayList<>()
 	private final List<GraphicsComponent> graphicsComponents = new ArrayList<>()
 	private final List<ImGuiComponent> imguiComponents = new ArrayList<>()
-	private final Queue<Closure> changeQueue = new ArrayDeque<>()
 
 	/**
 	 * Constructor, create a new scene to the given dimensions.
@@ -136,35 +135,6 @@ class AsteroidsScene extends Scene implements AutoCloseable {
 				collision.checkCollision(otherCollision)
 			}
 		}
-	}
-
-	@Override
-	void close() {
-
-		traverse { node ->
-			if (node instanceof AutoCloseable) {
-				node.close()
-			}
-		}
-	}
-
-	/**
-	 * Apply modifications made by other steps in the game loop.
-	 */
-	void processQueuedChanges() {
-
-		while (changeQueue) {
-			changeQueue.poll().call()
-		}
-	}
-
-	/**
-	 * Queue some scene modification to be performed at the end of the current
-	 * update cycle.
-	 */
-	void queueChange(Closure change) {
-
-		changeQueue.add(change)
 	}
 
 	/**
