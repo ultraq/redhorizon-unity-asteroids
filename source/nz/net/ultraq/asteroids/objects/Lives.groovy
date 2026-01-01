@@ -113,9 +113,9 @@ class Lives extends Entity<Lives> {
 		@Override
 		void render(ImGuiContext context) {
 
-			var viewport = window.viewport
+			var uiArea = window.uiArea
 			ImGui.setNextWindowBgAlpha(0.4f)
-			ImGui.setNextWindowPos(viewport.minX, viewport.minY)
+			ImGui.setNextWindowPos(uiArea.minX, uiArea.minY)
 			ImGui.pushFont(squareFont)
 			ImGui.pushStyleVar(WindowBorderSize, 0f)
 			ImGui.pushStyleVar(WindowPadding, 8 * context.uiScale as float, 4 * context.uiScale as float)
