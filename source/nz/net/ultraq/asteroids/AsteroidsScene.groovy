@@ -17,6 +17,7 @@
 package nz.net.ultraq.asteroids
 
 import nz.net.ultraq.asteroids.objects.AsteroidSpawner
+import nz.net.ultraq.asteroids.objects.GameOver
 import nz.net.ultraq.asteroids.objects.Lives
 import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.asteroids.objects.Score
@@ -56,14 +57,21 @@ class AsteroidsScene extends Scene {
 		addChild(player)
 		addChild(new AsteroidSpawner())
 
+		var uiScale = window.contentScale / window.renderScale as float
 		var io = ImGui.getIO()
-		var imFontConfig = new ImFontConfig()
+		var imFontConfig1 = new ImFontConfig()
 		var squareFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Square.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * (window.contentScale / window.renderScale) as float, imFontConfig)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * uiScale as float, imFontConfig1)
 		}
-		imFontConfig.destroy()
+		imFontConfig1.destroy()
+		var imFontConfig2 = new ImFontConfig()
+		var squareOutlineFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Squareo.ttf').withCloseable { stream ->
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 48 * uiScale as float, imFontConfig2)
+		}
+		imFontConfig2.destroy()
 
 		addChild(new Lives(squareFont))
 		addChild(new Score(squareFont))
+		addChild(new GameOver(squareFont, squareOutlineFont).disable())
 	}
 }

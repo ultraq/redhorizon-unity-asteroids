@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory
 import static imgui.flag.ImGuiStyleVar.*
 import static imgui.flag.ImGuiWindowFlags.*
 
-import java.util.concurrent.TimeUnit
-
 /**
  * Lives counter.
  *
@@ -73,7 +71,6 @@ class Lives extends Entity<Lives> {
 		@Override
 		void init() {
 
-			var window = WINDOW.get()
 			var scene = entity.scene as AsteroidsScene
 
 			scene.player.on(PlayerDestroyedEvent) { event ->
@@ -82,12 +79,6 @@ class Lives extends Entity<Lives> {
 
 				if (!entity.lives) {
 					logger.debug('Game over!')
-					// TODO: Game over
-//					scene.queueChange { ->
-//					}
-					scene.scheduleChange(1, TimeUnit.SECONDS) { ->
-						window.shouldClose(true)
-					}
 				}
 			}
 		}

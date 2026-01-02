@@ -108,17 +108,20 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 					entity.findComponentByType(CollisionComponent).disable()
 					velocity.zero()
 
+					// Respawn with lives remaining
 					var livesEntity = scene.findDescendent { it instanceof Lives } as Lives
 					if (livesEntity.lives > 1) {
-						// Respawn after 3 seconds
 						scene.scheduleChange(3, TimeUnit.SECONDS) { ->
 							scene.addChild(entity)
 						}
-
-						// Enable collision after 5 seconds (2 seconds after respawn)
 						scene.scheduleChange(5, TimeUnit.SECONDS) { ->
 							entity.findComponentByType(CollisionComponent).enable()
 						}
+					}
+					// Game over
+					else {
+						var gameOverEntity = scene.findDescendent { it instanceof GameOver } as GameOver
+						gameOverEntity.enable()
 					}
 
 					entity.trigger(new PlayerDestroyedEvent(entity, otherEntity))
