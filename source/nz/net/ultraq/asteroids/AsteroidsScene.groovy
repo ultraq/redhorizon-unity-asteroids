@@ -57,16 +57,15 @@ class AsteroidsScene extends Scene {
 		addChild(player)
 		addChild(new AsteroidSpawner())
 
-		var uiScale = window.contentScale / window.renderScale as float
 		var io = ImGui.getIO()
 		var imFontConfig1 = new ImFontConfig()
 		var squareFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Square.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * uiScale as float, imFontConfig1)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 16 * window.uiScale as float, imFontConfig1)
 		}
 		imFontConfig1.destroy()
 		var imFontConfig2 = new ImFontConfig()
 		var squareOutlineFont = getResourceAsStream('nz/net/ultraq/asteroids/assets/Squareo.ttf').withCloseable { stream ->
-			return io.fonts.addFontFromMemoryTTF(stream.bytes, 48 * uiScale as float, imFontConfig2)
+			return io.fonts.addFontFromMemoryTTF(stream.bytes, 48 * window.uiScale as float, imFontConfig2)
 		}
 		imFontConfig2.destroy()
 

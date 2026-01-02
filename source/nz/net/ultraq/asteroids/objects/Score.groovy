@@ -21,10 +21,8 @@ import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
-import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
 
 import imgui.ImFont
 import imgui.ImGui
@@ -90,18 +88,16 @@ class Score extends Entity<Score> {
 	static class ScoreUiComponent extends ImGuiComponent<ScoreUiComponent> {
 
 		private final ImFont squareFont
-		private final Window window
 
 		ScoreUiComponent(ImFont squareFont) {
 
 			this.squareFont = squareFont
-			this.window = WINDOW.get()
 		}
 
 		@Override
 		void render(ImGuiContext context) {
 
-			var uiArea = window.uiArea
+			var uiArea = context.uiArea
 			ImGui.setNextWindowBgAlpha(0.4f)
 			ImGui.setNextWindowPos(uiArea.minX, uiArea.minY + (24 * context.uiScale) as float)
 			ImGui.pushFont(squareFont)

@@ -18,9 +18,7 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
 
 import imgui.ImFont
 import imgui.ImGui
@@ -47,19 +45,17 @@ class GameOver extends Entity<GameOver> {
 
 		private final ImFont squareFont
 		private final ImFont squareOutlineFont
-		private final Window window
 
 		GameOverUiComponent(ImFont squareFont, ImFont squareOutlineFont) {
 
 			this.squareFont = squareFont
 			this.squareOutlineFont = squareOutlineFont
-			this.window = WINDOW.get()
 		}
 
 		@Override
 		void render(ImGuiContext context) {
 
-			var uiArea = window.uiArea
+			var uiArea = context.uiArea
 			ImGui.setNextWindowBgAlpha(0.4f)
 			ImGui.setNextWindowPos(
 				uiArea.minX + (uiArea.lengthX() / 2) - (130 * context.uiScale) as float,

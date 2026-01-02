@@ -22,10 +22,9 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Image
-import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.getRESOURCE_MANAGER
 
 import imgui.ImFont
 import imgui.ImGui
@@ -91,12 +90,10 @@ class Lives extends Entity<Lives> {
 
 		private final ImFont squareFont
 		private final Image livesImage
-		private final Window window
 
 		LivesUiComponent(ImFont squareFont) {
 
 			this.squareFont = squareFont
-			this.window = WINDOW.get()
 			var resourceManager = RESOURCE_MANAGER.get()
 			livesImage = resourceManager.loadImage('Lives.png')
 		}
@@ -104,7 +101,7 @@ class Lives extends Entity<Lives> {
 		@Override
 		void render(ImGuiContext context) {
 
-			var uiArea = window.uiArea
+			var uiArea = context.uiArea
 			ImGui.setNextWindowBgAlpha(0.4f)
 			ImGui.setNextWindowPos(uiArea.minX, uiArea.minY)
 			ImGui.pushFont(squareFont)
