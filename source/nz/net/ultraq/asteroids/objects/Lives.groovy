@@ -53,7 +53,7 @@ class Lives extends Entity<Lives> {
 	 */
 	Lives(ImFont squareFont) {
 
-		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), LivesScript))
+		addComponent(new ScriptComponent(LivesScript))
 		addComponent(new LivesUiComponent(squareFont))
 	}
 

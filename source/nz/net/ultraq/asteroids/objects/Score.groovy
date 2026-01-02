@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
 
 import imgui.ImFont
 import imgui.ImGui
@@ -51,7 +51,7 @@ class Score extends Entity<Score> {
 	 */
 	Score(ImFont squareFont) {
 
-		addComponent(new ScriptComponent(SCRIPT_ENGINE.get(), ScoreScript))
+		addComponent(new ScriptComponent(ScoreScript))
 		addComponent(new ScoreUiComponent(squareFont))
 	}
 

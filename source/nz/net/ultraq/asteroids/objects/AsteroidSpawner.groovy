@@ -20,7 +20,6 @@ import nz.net.ultraq.asteroids.objects.Asteroid.Size
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import static nz.net.ultraq.asteroids.ScopedValues.SCRIPT_ENGINE
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -44,9 +43,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 	 */
 	AsteroidSpawner() {
 
-		var scriptEngine = SCRIPT_ENGINE.get()
-
-		addComponent(new ScriptComponent(scriptEngine, AsteroidSpawnerScript))
+		addComponent(new ScriptComponent(AsteroidSpawnerScript))
 	}
 
 	/**

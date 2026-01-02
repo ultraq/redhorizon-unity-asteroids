@@ -26,8 +26,7 @@ import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import nz.net.ultraq.redhorizon.input.InputEventHandler
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.Vector2f
 import org.joml.Vector3f
@@ -58,12 +57,10 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 	Player() {
 
 		var resourceManager = RESOURCE_MANAGER.get()
-		var scriptEngine = SCRIPT_ENGINE.get()
-
 		var playerImage = resourceManager.loadImage('Player.png')
 		addComponent(new SpriteComponent(playerImage, BasicShader))
 		addComponent(new CircleCollisionComponent(playerImage.width / 2))
-		addComponent(new ScriptComponent(scriptEngine, PlayerScript))
+		addComponent(new ScriptComponent(PlayerScript))
 	}
 
 	/**
@@ -71,7 +68,6 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 	 */
 	static class PlayerScript extends EntityScript<Player> {
 
-		private final InputEventHandler input
 		private CameraEntity camera
 		private Vector2f worldBoundsMin
 		private Vector2f worldBoundsMax
@@ -89,14 +85,6 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 		// Shooting
 		private float firingCooldown
-
-		/**
-		 * Constructor, set the player script up with the scoped values.
-		 */
-		PlayerScript() {
-
-			input = INPUT_EVENT_HANDLER.get()
-		}
 
 		@Override
 		void init() {

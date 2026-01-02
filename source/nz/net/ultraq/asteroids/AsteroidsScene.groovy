@@ -20,15 +20,10 @@ import nz.net.ultraq.asteroids.objects.AsteroidSpawner
 import nz.net.ultraq.asteroids.objects.Lives
 import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.asteroids.objects.Score
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugComponent
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.graphics.Window
-import nz.net.ultraq.redhorizon.graphics.imgui.DebugOverlay
 import nz.net.ultraq.redhorizon.scenegraph.Scene
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
 
 import imgui.ImFontConfig
 import imgui.ImGui
@@ -70,24 +65,5 @@ class AsteroidsScene extends Scene {
 
 		addChild(new Lives(squareFont))
 		addChild(new Score(squareFont))
-
-		var debugOverlayComponent = new ImGuiDebugComponent(new DebugOverlay()
-			.withCursorTracking(camera.camera, camera.transform, window)).disable()
-		var nodeListComponent = new ImGuiDebugComponent(new NodeList(this)).disable()
-		var logPanelComponent = new ImGuiDebugComponent(new LogPanel()).disable()
-		addChild(new Entity()
-			.addComponent(debugOverlayComponent)
-			.addComponent(nodeListComponent)
-			.addComponent(logPanelComponent)
-			.withName('Debug UI'))
-
-		var debugLinesBinding = new DebugLinesBinding(this)
-		var debugEverythingBinding = new DebugEverythingBinding(
-			[debugOverlayComponent, nodeListComponent, logPanelComponent], debugLinesBinding)
-		var inputEventHandler = INPUT_EVENT_HANDLER.get()
-		inputEventHandler
-			.addImGuiDebugBindings([debugOverlayComponent], [nodeListComponent, logPanelComponent])
-			.addInputBinding(debugLinesBinding)
-			.addInputBinding(debugEverythingBinding)
 	}
 }

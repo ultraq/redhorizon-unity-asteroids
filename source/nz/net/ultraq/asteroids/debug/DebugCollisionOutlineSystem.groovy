@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package nz.net.ultraq.asteroids.engine
+package nz.net.ultraq.asteroids.debug
 
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.redhorizon.engine.Entity
+import nz.net.ultraq.redhorizon.engine.System
 import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
 import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.graphics.Colour

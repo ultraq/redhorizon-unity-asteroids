@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.Matrix4fc
 import org.joml.Vector2fc
@@ -47,16 +47,14 @@ class Bullet extends Entity<Bullet> {
 	 */
 	Bullet(Matrix4fc initialTransform, Vector2fc initialVelocity) {
 
-		var resourceManager = RESOURCE_MANAGER.get()
-		var scriptEngine = SCRIPT_ENGINE.get()
-
 		transform.set(initialTransform).translate(0f, 32f, 0f) // Start slightly ahead of the object
 		this.initialVelocity = initialVelocity // Include ship velocity for moving bullets
 
+		var resourceManager = RESOURCE_MANAGER.get()
 		var bulletImage = resourceManager.loadImage('Square.png')
 		addComponent(new SpriteComponent(bulletImage, BasicShader))
 		addComponent(new CircleCollisionComponent(bulletImage.width / 2))
-		addComponent(new ScriptComponent(scriptEngine, BulletScript))
+		addComponent(new ScriptComponent(BulletScript))
 	}
 
 	/**

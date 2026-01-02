@@ -24,7 +24,7 @@ import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
-import static nz.net.ultraq.asteroids.ScopedValues.*
+import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.FrustumIntersection
 import org.joml.Matrix4f
@@ -61,9 +61,6 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 	 */
 	Asteroid(Size size, Vector2fc initialPosition, float rotation) {
 
-		var resourceManager = RESOURCE_MANAGER.get()
-		var scriptEngine = SCRIPT_ENGINE.get()
-
 		this.size = size
 
 		transform
@@ -71,11 +68,12 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 			.rotateXYZ(0f, 0f, rotation)
 			.scale(size == Size.LARGE ? 1f : size == Size.MEDIUM ? 0.5f : 0.25f)
 
+		var resourceManager = RESOURCE_MANAGER.get()
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
 		addComponent(new SpriteComponent(asteroidImage, BasicShader)
 			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
 		addComponent(new CircleCollisionComponent(asteroidImage.width / 2))
-		addComponent(new ScriptComponent(scriptEngine, AsteroidScript))
+		addComponent(new ScriptComponent(AsteroidScript))
 	}
 
 	/**
