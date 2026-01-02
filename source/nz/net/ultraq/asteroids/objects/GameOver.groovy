@@ -62,8 +62,8 @@ class GameOver extends Entity<GameOver> {
 			var uiArea = window.uiArea
 			ImGui.setNextWindowBgAlpha(0.4f)
 			ImGui.setNextWindowPos(
-				uiArea.minX + (uiArea.lengthX() / 2) - 130 as float,
-				uiArea.minY + (uiArea.lengthY() / 2) - 100 as float)
+				uiArea.minX + (uiArea.lengthX() / 2) - (130 * context.uiScale) as float,
+				uiArea.minY + (uiArea.lengthY() / 2) - (100 * context.uiScale) as float)
 			ImGui.pushStyleVar(WindowBorderSize, 0f)
 
 			ImGui.begin('Game Over', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
@@ -71,7 +71,7 @@ class GameOver extends Entity<GameOver> {
 			ImGui.text('Game Over')
 			ImGui.popFont()
 			ImGui.pushFont(squareFont)
-			ImGui.setCursorPosX(62f)
+			ImGui.setCursorPosX(62 * context.uiScale as float)
 			ImGui.text('Press ESC to exit')
 			ImGui.popFont()
 			ImGui.end()
