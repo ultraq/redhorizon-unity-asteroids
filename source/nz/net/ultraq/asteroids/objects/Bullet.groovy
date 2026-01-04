@@ -47,7 +47,7 @@ class Bullet extends Entity<Bullet> {
 	 */
 	Bullet(Matrix4fc initialTransform, Vector2fc initialVelocity) {
 
-		transform.set(initialTransform).translate(0f, 32f, 0f) // Start slightly ahead of the object
+		setTransform(initialTransform).translate(0f, 32f) // Start slightly ahead of the object
 		this.initialVelocity = initialVelocity // Include ship velocity for moving bullets
 
 		var resourceManager = RESOURCE_MANAGER.get()
@@ -94,7 +94,7 @@ class Bullet extends Entity<Bullet> {
 
 			// Keep moving along
 			else {
-				entity.translate(0f, (bulletSpeed + entity.initialVelocity.length()) * delta as float, 0f)
+				entity.translate(0f, (bulletSpeed + entity.initialVelocity.length()) * delta as float)
 			}
 		}
 	}

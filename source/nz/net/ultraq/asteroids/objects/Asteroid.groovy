@@ -62,16 +62,15 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 	Asteroid(Size size, Vector2fc initialPosition, float rotation) {
 
 		this.size = size
-
-		transform
-			.translate(initialPosition.x(), initialPosition.y(), 0f)
-			.rotateXYZ(0f, 0f, rotation)
+		this
+			.translate(initialPosition.x(), initialPosition.y())
+			.rotate(0f, 0f, rotation)
 			.scale(size == Size.LARGE ? 1f : size == Size.MEDIUM ? 0.5f : 0.25f)
 
 		var resourceManager = RESOURCE_MANAGER.get()
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
 		addComponent(new SpriteComponent(asteroidImage, BasicShader)
-			.rotate(0f, 0f, (Math.random() * 2 * Math.PI) as float))
+			.rotate(0f, 0f, Math.random() * 2 * Math.PI as float))
 		addComponent(new CircleCollisionComponent(asteroidImage.width / 2))
 		addComponent(new ScriptComponent(AsteroidScript))
 	}
@@ -107,13 +106,11 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 						var newSize = entity.size == Size.LARGE ? Size.MEDIUM : Size.SMALL
 						scene.addChild(
 							new Asteroid(newSize, splitPosition1.set(entity.position).add(-4f, 0f),
-								entity.transform.getEulerAnglesXYZ(splitRotation1)
-									.add(0f, 0f, Math.toRadians(Math.random() * 90) as float).z)
+								entity.getRotation().add(0f, 0f, Math.toRadians(Math.random() * 90) as float, splitRotation1).z)
 								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
 						scene.addChild(
 							new Asteroid(newSize, splitPosition2.set(entity.position).add(4f, 0f),
-								entity.transform.getEulerAnglesXYZ(splitRotation2)
-									.add(0f, 0f, Math.toRadians(Math.random() * -90) as float).z)
+								entity.getRotation().add(0f, 0f, Math.toRadians(Math.random() * -90) as float, splitRotation2).z)
 								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
 					}
 				}
@@ -148,7 +145,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 
 			// Keep moving along
 			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 3f : 12f)
-			entity.transform.translate(0f, speed * delta as float, 0f)
+			entity.translate(0f, speed * delta as float)
 		}
 	}
 }

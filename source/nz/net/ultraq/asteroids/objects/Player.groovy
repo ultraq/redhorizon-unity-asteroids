@@ -104,7 +104,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 				scene.queueChange { ->
 					scene.removeChild(entity)
-					entity.transform.identity()
+					entity.resetTransform()
 					entity.findComponentByType(CollisionComponent).disable()
 					velocity.zero()
 
@@ -149,7 +149,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 				worldCursorPosition.set(camera.unproject(cursorPosition.x(), cursorPosition.y(), unprojectResult))
 				worldCursorPosition.sub(positionXY, headingToCursor)
 				heading = headingToCursor.angle(Vector2f.UP)
-				entity.transform.setRotationXYZ(0f, 0f, -heading)
+				entity.setRotation(0f, 0f, -heading)
 			}
 		}
 
@@ -182,7 +182,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 			// Adjust position based on velocity
 			if (velocity) {
 				updatedPosition.set(entity.position).add(velocity).min(worldBoundsMax).max(worldBoundsMin)
-				entity.setPosition(updatedPosition.x(), updatedPosition.y(), 0)
+				entity.setPosition(updatedPosition.x(), updatedPosition.y())
 			}
 		}
 
