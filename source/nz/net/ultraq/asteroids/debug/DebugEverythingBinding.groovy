@@ -16,9 +16,13 @@
 
 package nz.net.ultraq.asteroids.debug
 
+import nz.net.ultraq.asteroids.AsteroidsScene
+import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
+import org.joml.primitives.Rectanglef
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
 
 /**
@@ -34,18 +38,44 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_P
  */
 class DebugEverythingBinding extends KeyBinding {
 
-	DebugEverythingBinding(List<ImGuiComponent> debugWindows, DebugLinesBinding debugLinesBinding) {
+	private static final Colour LIGHT_GREY = new Colour('Light grey', 0.85f, 0.85f, 0.85f, 1f)
+
+	private static boolean enabled = false
+
+	DebugEverythingBinding(AsteroidsScene scene, List<ImGuiComponent> debugWindows) {
 
 		super(GLFW_KEY_P, true, { ->
+			enabled = !enabled
+
 			debugWindows.each { window ->
-				if (window.enabled) {
-					window.disable()
-				}
-				else {
+				if (enabled) {
 					window.enable()
 				}
+				else {
+					window.disable()
+				}
 			}
-			debugLinesBinding.action()
+
+			var gridLines = scene.findDescendent { it instanceof GridLinesEntity } as GridLinesEntity
+			if (enabled) {
+				if (!gridLines) {
+					scene.insertBefore(
+						new GridLinesEntity(new Rectanglef(0f, 0f, AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center(), 100f,
+							LIGHT_GREY, Colour.GREY)
+							.withName('Grid lines'),
+						scene.player)
+				}
+				else {
+					gridLines.enable()
+				}
+			}
+			else {
+				if (gridLines) {
+					gridLines.disable()
+				}
+			}
+
+			scene.showCollisionLines = !scene.showCollisionLines
 		})
 	}
 }

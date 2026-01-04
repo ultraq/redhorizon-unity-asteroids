@@ -22,6 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
 
 import imgui.ImFont
@@ -50,7 +51,7 @@ class Score extends Entity<Score> {
 	Score(ImFont squareFont) {
 
 		addComponent(new ScriptComponent(ScoreScript))
-		addComponent(new ScoreUiComponent(squareFont))
+		addComponent(new ImGuiComponent(new ScoreUiComponent(squareFont)))
 	}
 
 	/**
@@ -85,7 +86,7 @@ class Score extends Entity<Score> {
 	/**
 	 * UI component for displaying the player's score.
 	 */
-	static class ScoreUiComponent extends ImGuiComponent<ScoreUiComponent> {
+	class ScoreUiComponent implements ImGuiElement {
 
 		private final ImFont squareFont
 
@@ -105,7 +106,7 @@ class Score extends Entity<Score> {
 			ImGui.pushStyleVar(WindowPadding, 8 * context.uiScale as float, 4 * context.uiScale as float)
 
 			ImGui.begin('Score', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-			ImGui.text(String.format('%,d', ((Score)entity).score))
+			ImGui.text(String.format('%,d', score))
 
 			ImGui.popStyleVar(2)
 			ImGui.popFont()

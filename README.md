@@ -32,11 +32,7 @@ The current control scheme is:
  - Press `Esc` to quit the game at any time
 
 Debug controls:
- - `I` to toggle debug information panels - a list of objects in the scene and
-   a log output - both of which can be docked to the edges of the window
  - `O` to toggle a debug overlay which contains an FPS counter
- - `L` to toggle showing grid lines on the scene and collision boxes around
-   objects that are collidable
  - `P` to toggle all of the above
  - `V` to cycle through vsync options
     - On Windows this will cycle through 1/1, 1/2, 1/3, 1/4, and no vsync

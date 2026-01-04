@@ -23,6 +23,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import static nz.net.ultraq.asteroids.ScopedValues.getRESOURCE_MANAGER
 
@@ -51,7 +52,7 @@ class Lives extends Entity<Lives> {
 	Lives(ImFont squareFont) {
 
 		addComponent(new ScriptComponent(LivesScript))
-		addComponent(new LivesUiComponent(squareFont))
+		addComponent(new ImGuiComponent(new LivesUiComponent(squareFont)))
 	}
 
 	/**
@@ -86,7 +87,7 @@ class Lives extends Entity<Lives> {
 	/**
 	 * Component for rendering the number of lives remaining to the UI.
 	 */
-	static class LivesUiComponent extends ImGuiComponent<LivesUiComponent> {
+	class LivesUiComponent implements ImGuiElement {
 
 		private final ImFont squareFont
 		private final Image livesImage
@@ -114,7 +115,7 @@ class Lives extends Entity<Lives> {
 				livesImage.height / (4 / context.uiScale) as float,
 				0f, 1f, 1f, 0f)
 			ImGui.sameLine()
-			ImGui.text("x ${((Lives)entity).lives}")
+			ImGui.text("x ${lives}")
 
 			ImGui.popStyleVar(2)
 			ImGui.popFont()

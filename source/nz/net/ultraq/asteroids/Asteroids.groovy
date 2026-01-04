@@ -18,11 +18,10 @@ package nz.net.ultraq.asteroids
 
 import nz.net.ultraq.asteroids.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.asteroids.debug.DebugEverythingBinding
-import nz.net.ultraq.asteroids.debug.DebugLinesBinding
 import nz.net.ultraq.redhorizon.engine.Engine
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiDebugComponent
+import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
@@ -93,22 +92,20 @@ class Asteroids implements Runnable {
 
 					// Init scene and systems
 					scene = new AsteroidsScene().tap {
-						var debugOverlayComponent = new ImGuiDebugComponent(new DebugOverlay()
+						var debugOverlayComponent = new ImGuiComponent(new DebugOverlay()
 							.withCursorTracking(camera.camera, camera.transform, this.window)).disable()
-						var nodeListComponent = new ImGuiDebugComponent(new NodeList(it)).disable()
-						var logPanelComponent = new ImGuiDebugComponent(new LogPanel()).disable()
+						var nodeListComponent = new ImGuiComponent(new NodeList(it)).disable()
+						var logPanelComponent = new ImGuiComponent(new LogPanel()).disable()
 						addChild(new Entity()
 							.addComponent(debugOverlayComponent)
 							.addComponent(nodeListComponent)
 							.addComponent(logPanelComponent)
 							.withName('Debug UI'))
 
-						var debugLinesBinding = new DebugLinesBinding(it)
-						var debugEverythingBinding = new DebugEverythingBinding(
-							[debugOverlayComponent, nodeListComponent, logPanelComponent], debugLinesBinding)
+						var debugEverythingBinding = new DebugEverythingBinding(it,
+							[debugOverlayComponent, nodeListComponent, logPanelComponent])
 						inputEventHandler
-							.addImGuiDebugBindings([debugOverlayComponent], [nodeListComponent, logPanelComponent])
-							.addInputBinding(debugLinesBinding)
+							.addImGuiOverlayBinding([debugOverlayComponent])
 							.addInputBinding(debugEverythingBinding)
 					}
 					var engine = new Engine()
