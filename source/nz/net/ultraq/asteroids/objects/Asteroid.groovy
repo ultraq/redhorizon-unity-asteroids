@@ -102,7 +102,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 
 				if (entity.size == Size.LARGE || entity.size == Size.MEDIUM) {
 					logger.debug('{} collided with bullet - splitting', entity.name)
-					scene.queueChange { ->
+					scene.queueUpdate { ->
 						var newSize = entity.size == Size.LARGE ? Size.MEDIUM : Size.SMALL
 						scene.addChild(
 							new Asteroid(newSize, splitPosition1.set(entity.position).add(-4f, 0f),
@@ -118,7 +118,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 					logger.debug('{} collided with bullet - destroying', entity.name)
 				}
 
-				scene.queueChange { ->
+				scene.queueUpdate { ->
 					entity.parent.removeChild(entity)
 					entity.close()
 				}
@@ -133,7 +133,7 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 			var lastVisible = visible
 			var nowVisible = frustumIntersection.testPoint(entity.position)
 			if (lastVisible && !nowVisible) {
-				entity.scene.queueChange { ->
+				entity.scene.queueUpdate { ->
 					entity.parent.removeChild(entity)
 					entity.close()
 				}

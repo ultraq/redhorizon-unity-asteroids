@@ -102,7 +102,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 				logger.debug('The player collided with {}!', otherEntity.name)
 				var scene = entity.scene
 
-				scene.queueChange { ->
+				scene.queueUpdate { ->
 					scene.removeChild(entity)
 					entity.resetTransform()
 					entity.findComponentByType(CollisionComponent).disable()
@@ -111,10 +111,10 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 					// Respawn with lives remaining
 					var livesEntity = scene.findDescendent { it instanceof Lives } as Lives
 					if (livesEntity.lives > 1) {
-						scene.scheduleChange(3, TimeUnit.SECONDS) { ->
+						scene.queueUpdate(3, TimeUnit.SECONDS) { ->
 							scene.addChild(entity)
 						}
-						scene.scheduleChange(5, TimeUnit.SECONDS) { ->
+						scene.queueUpdate(5, TimeUnit.SECONDS) { ->
 							entity.findComponentByType(CollisionComponent).enable()
 						}
 					}
@@ -195,7 +195,7 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 			if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
 				var scene = entity.scene
-				scene.queueChange { ->
+				scene.queueUpdate { ->
 					scene.addChild(new Bullet(entity.transform, velocity)
 						.withName("Bullet ${bulletCount++}"))
 				}

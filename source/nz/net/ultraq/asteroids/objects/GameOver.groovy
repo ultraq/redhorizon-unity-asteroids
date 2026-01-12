@@ -19,7 +19,7 @@ package nz.net.ultraq.asteroids.objects
 import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 
 import imgui.ImFont
 import imgui.ImGui
@@ -42,7 +42,7 @@ class GameOver extends Entity<GameOver> {
 		addComponent(new ImGuiComponent(new GameOverUiComponent(squareFont, squareOutlineFont)))
 	}
 
-	static class GameOverUiComponent implements ImGuiElement {
+	static class GameOverUiComponent implements ImGuiModule {
 
 		private final ImFont squareFont
 		private final ImFont squareOutlineFont

@@ -23,7 +23,7 @@ import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
 import static nz.net.ultraq.asteroids.ScopedValues.getRESOURCE_MANAGER
 
@@ -87,7 +87,7 @@ class Lives extends Entity<Lives> {
 	/**
 	 * Component for rendering the number of lives remaining to the UI.
 	 */
-	class LivesUiComponent implements ImGuiElement {
+	class LivesUiComponent implements ImGuiModule {
 
 		private final ImFont squareFont
 		private final Image livesImage

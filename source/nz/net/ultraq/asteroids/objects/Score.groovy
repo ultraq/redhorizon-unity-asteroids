@@ -22,7 +22,7 @@ import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
 import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
-import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiElement
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
 
 import imgui.ImFont
@@ -86,7 +86,7 @@ class Score extends Entity<Score> {
 	/**
 	 * UI component for displaying the player's score.
 	 */
-	class ScoreUiComponent implements ImGuiElement {
+	class ScoreUiComponent implements ImGuiModule {
 
 		private final ImFont squareFont
 

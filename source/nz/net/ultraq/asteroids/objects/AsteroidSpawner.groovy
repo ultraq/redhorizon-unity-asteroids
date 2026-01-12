@@ -76,7 +76,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 				headingCenter.set(spawnPoint).mul(-1f)
 				var spawnRotation = Vector2f.UP.angle(headingCenter) + (Math.toRadians(Math.random() * 30 - 15)) as float
 				logger.debug('Spawning asteroid at: {}, {}', format('%.2f', spawnPoint.x), format('%.2f', spawnPoint.y))
-				scene.queueChange { ->
+				scene.queueUpdate { ->
 					scene.addChild(new Asteroid(Size.LARGE, spawnPoint, spawnRotation)
 						.withName("Asteroid ${Asteroid.count++} (large)"))
 				}

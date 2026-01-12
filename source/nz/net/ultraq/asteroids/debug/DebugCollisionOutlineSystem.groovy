@@ -27,6 +27,8 @@ import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
 import org.joml.Vector3f
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * Manage the drawing of collision outlines for debuggin.
@@ -35,39 +37,42 @@ import org.joml.Vector3f
  */
 class DebugCollisionOutlineSystem extends System {
 
+	private static final Logger logger = LoggerFactory.getLogger(DebugCollisionOutlineSystem)
 	private static final String COLLISION_OUTLINE_NAME = 'Collision outline'
 
 	@Override
 	void update(Scene scene, float delta) {
 
-		scene.traverse(Entity) { Entity entity ->
-			var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
-			var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
-			if (((AsteroidsScene)scene).showCollisionLines) {
-				if (collision) {
-					if (!collisionOutline) {
-						var radius = collision.radius
-						collisionOutline = entity.addAndReturnComponent(
-							new MeshComponent(Type.LINE_LOOP, new Vertex[]{
-								new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
-								new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
-							})
-								.withName(COLLISION_OUTLINE_NAME)
-						)
-					}
-					if (collision.enabled) {
-						collisionOutline.enable()
-					}
-					else {
-						collisionOutline.disable()
+		average('Update', 1f, logger) { ->
+			scene.traverse(Entity) { Entity entity ->
+				var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
+				var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
+				if (((AsteroidsScene)scene).showCollisionLines) {
+					if (collision) {
+						if (!collisionOutline) {
+							var radius = collision.radius
+							collisionOutline = entity.addAndReturnComponent(
+								new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
+									new Vertex(new Vector3f(-radius as float, radius as float, 0), Colour.YELLOW)
+								})
+									.withName(COLLISION_OUTLINE_NAME)
+							)
+						}
+						if (collision.enabled) {
+							collisionOutline.enable()
+						}
+						else {
+							collisionOutline.disable()
+						}
 					}
 				}
-			}
-			else {
-				if (collisionOutline) {
-					collisionOutline.disable()
+				else {
+					if (collisionOutline) {
+						collisionOutline.disable()
+					}
 				}
 			}
 		}

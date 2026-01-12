@@ -93,9 +93,13 @@ class Asteroids implements Runnable {
 					// Init scene and systems
 					scene = new AsteroidsScene().tap {
 						var debugOverlayComponent = new ImGuiComponent(new DebugOverlay()
-							.withCursorTracking(camera.camera, camera.transform, this.window)).disable()
-						var nodeListComponent = new ImGuiComponent(new NodeList(it)).disable()
-						var logPanelComponent = new ImGuiComponent(new LogPanel()).disable()
+							.withCursorTracking(this.window, camera)
+							.withProfilingLogging())
+							.disable()
+						var nodeListComponent = new ImGuiComponent(new NodeList(it))
+							.disable()
+						var logPanelComponent = new ImGuiComponent(new LogPanel())
+							.disable()
 						addChild(new Entity()
 							.addComponent(debugOverlayComponent)
 							.addComponent(nodeListComponent)

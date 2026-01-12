@@ -70,7 +70,7 @@ class Bullet extends Entity<Bullet> {
 
 			if (otherEntity instanceof Asteroid && !queuedForRemoval) {
 				logger.debug('Bullet collided with {} - removing from scene', otherEntity.name)
-				entity.scene.queueChange { ->
+				entity.scene.queueUpdate { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}
@@ -85,7 +85,7 @@ class Bullet extends Entity<Bullet> {
 
 			// Destroy bullet if it reaches the max lifetime
 			if (bulletTimer > bulletLifetime && !queuedForRemoval) {
-				entity.scene.queueChange { ->
+				entity.scene.queueUpdate { ->
 					entity.parent?.removeChild(entity)
 					entity.close()
 				}
