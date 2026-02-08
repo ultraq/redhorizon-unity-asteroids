@@ -16,10 +16,9 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import imgui.ImFont
 import imgui.ImGui
@@ -32,17 +31,17 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class GameOver extends Entity<GameOver> {
+class GameOver extends Node<GameOver> {
 
 	/**
 	 * Constructor, adds a UI component that will be shown when it's game over.
 	 */
 	GameOver(ImFont squareFont, ImFont squareOutlineFont) {
 
-		addComponent(new ImGuiComponent(new GameOverUiComponent(squareFont, squareOutlineFont)))
+		addChild(new GameOverUiComponent(squareFont, squareOutlineFont))
 	}
 
-	static class GameOverUiComponent implements ImGuiModule {
+	static class GameOverUiComponent extends ImGuiModule {
 
 		private final ImFont squareFont
 		private final ImFont squareOutlineFont

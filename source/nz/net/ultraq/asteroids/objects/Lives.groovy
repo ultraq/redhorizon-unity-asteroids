@@ -17,15 +17,14 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.Image
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLTexture
-import static nz.net.ultraq.asteroids.ScopedValues.getRESOURCE_MANAGER
+import nz.net.ultraq.redhorizon.scenegraph.Node
+import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import imgui.ImFont
 import imgui.ImGui
@@ -40,7 +39,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class Lives extends Entity<Lives> {
+class Lives extends Node<Lives> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Lives)
 
@@ -51,8 +50,8 @@ class Lives extends Entity<Lives> {
 	 */
 	Lives(ImFont squareFont) {
 
-		addComponent(new ScriptComponent(LivesScript))
-		addComponent(new ImGuiComponent(new LivesUiComponent(squareFont)))
+		addChild(new ScriptNode(LivesScript))
+		addChild(new LivesUiComponent(squareFont))
 	}
 
 	/**
@@ -66,18 +65,18 @@ class Lives extends Entity<Lives> {
 	/**
 	 * Script for tracking player lives.
 	 */
-	static class LivesScript extends EntityScript<Lives> {
+	static class LivesScript extends Script<Lives> {
 
 		@Override
 		void init() {
 
-			var scene = entity.scene as AsteroidsScene
+			var scene = node.scene as AsteroidsScene
 
 			scene.player.on(PlayerDestroyedEvent) { event ->
-				entity.lives--
-				logger.debug('Lives: {}', entity.lives)
+				node.lives--
+				logger.debug('Lives: {}', node.lives)
 
-				if (!entity.lives) {
+				if (!node.lives) {
 					logger.debug('Game over!')
 				}
 			}
@@ -87,7 +86,7 @@ class Lives extends Entity<Lives> {
 	/**
 	 * Component for rendering the number of lives remaining to the UI.
 	 */
-	class LivesUiComponent implements ImGuiModule {
+	class LivesUiComponent extends ImGuiModule {
 
 		private final ImFont squareFont
 		private final Image livesImage

@@ -17,12 +17,11 @@
 package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import nz.net.ultraq.redhorizon.scenegraph.NodeAddedEvent
 
 import imgui.ImFont
@@ -38,7 +37,7 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class Score extends Entity<Score> {
+class Score extends Node<Score> {
 
 	private static final Logger logger = LoggerFactory.getLogger(Score)
 
@@ -50,8 +49,8 @@ class Score extends Entity<Score> {
 	 */
 	Score(ImFont squareFont) {
 
-		addComponent(new ScriptComponent(ScoreScript))
-		addComponent(new ImGuiComponent(new ScoreUiComponent(squareFont)))
+		addChild(new ScriptNode(ScoreScript))
+		addChild(new ScoreUiComponent(squareFont))
 	}
 
 	/**
@@ -65,18 +64,18 @@ class Score extends Entity<Score> {
 	/**
 	 * Game script for tracking the player score.
 	 */
-	static class ScoreScript extends EntityScript<Score> {
+	static class ScoreScript extends Script<Score> {
 
 		@Override
 		void init() {
 
-			entity.scene.on(NodeAddedEvent) { nodeAddedEvent ->
-				var node = nodeAddedEvent.node()
-				if (node instanceof Asteroid) {
-					node.on(AsteroidDestroyedEvent) { asteroidDestroyedEvent ->
+			node.scene.on(NodeAddedEvent) { nodeAddedEvent ->
+				var nodeAdded = nodeAddedEvent.node()
+				if (nodeAdded instanceof Asteroid) {
+					nodeAdded.on(AsteroidDestroyedEvent) { asteroidDestroyedEvent ->
 						var asteroid = asteroidDestroyedEvent.asteroid()
-						entity.score += asteroid.size == Size.LARGE ? 25 : asteroid.size == Size.MEDIUM ? 50 : 100
-						logger.debug('Score: {}', entity.score)
+						node.score += asteroid.size == Size.LARGE ? 25 : asteroid.size == Size.MEDIUM ? 50 : 100
+						logger.debug('Score: {}', node.score)
 					}
 				}
 			}
@@ -86,7 +85,7 @@ class Score extends Entity<Score> {
 	/**
 	 * UI component for displaying the player's score.
 	 */
-	class ScoreUiComponent implements ImGuiModule {
+	class ScoreUiComponent extends ImGuiModule {
 
 		private final ImFont squareFont
 

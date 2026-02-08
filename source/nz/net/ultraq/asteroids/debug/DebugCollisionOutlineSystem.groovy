@@ -17,12 +17,11 @@
 package nz.net.ultraq.asteroids.debug
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.System
-import nz.net.ultraq.redhorizon.engine.graphics.MeshComponent
-import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollider
 import nz.net.ultraq.redhorizon.graphics.Colour
 import nz.net.ultraq.redhorizon.graphics.Mesh.Type
+import nz.net.ultraq.redhorizon.graphics.Shape
 import nz.net.ultraq.redhorizon.graphics.Vertex
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 
@@ -44,15 +43,14 @@ class DebugCollisionOutlineSystem extends System {
 	void update(Scene scene, float delta) {
 
 		average('Update', 1f, logger) { ->
-			scene.traverse(Entity) { Entity entity ->
-				var collision = entity.findComponentByType(CircleCollisionComponent) as CircleCollisionComponent
-				var collisionOutline = entity.findComponent { it.name == COLLISION_OUTLINE_NAME } as MeshComponent
+			scene.traverse(CircleCollider) { CircleCollider collider ->
+				var collisionOutline = collider.parent.findDescendent { it.name == COLLISION_OUTLINE_NAME } as Shape
 				if (((AsteroidsScene)scene).showCollisionLines) {
-					if (collision) {
+					if (collider) {
 						if (!collisionOutline) {
-							var radius = collision.radius
-							collisionOutline = entity.addAndReturnComponent(
-								new MeshComponent(Type.LINE_LOOP, new Vertex[]{
+							var radius = collider.radius
+							collisionOutline = collider.addAndReturnChild(
+								new Shape(Type.LINE_LOOP, new Vertex[]{
 									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
 									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),
 									new Vertex(new Vector3f(radius as float, radius as float, 0), Colour.YELLOW),
@@ -61,7 +59,7 @@ class DebugCollisionOutlineSystem extends System {
 									.withName(COLLISION_OUTLINE_NAME)
 							)
 						}
-						if (collision.enabled) {
+						if (collider.enabled) {
 							collisionOutline.enable()
 						}
 						else {
@@ -74,6 +72,7 @@ class DebugCollisionOutlineSystem extends System {
 						collisionOutline.disable()
 					}
 				}
+				return true
 			}
 		}
 	}

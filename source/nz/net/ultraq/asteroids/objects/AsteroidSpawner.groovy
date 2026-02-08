@@ -16,10 +16,11 @@
 
 package nz.net.ultraq.asteroids.objects
 
+import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.asteroids.objects.Asteroid.Size
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import org.joml.Vector2f
 import org.slf4j.Logger
@@ -32,7 +33,7 @@ import static java.lang.String.format
  *
  * @author Emanuel Rabina
  */
-class AsteroidSpawner extends Entity<AsteroidSpawner> {
+class AsteroidSpawner extends Node<AsteroidSpawner> {
 
 	private static final Logger logger = LoggerFactory.getLogger(AsteroidSpawner)
 
@@ -43,13 +44,13 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 	 */
 	AsteroidSpawner() {
 
-		addComponent(new ScriptComponent(AsteroidSpawnerScript))
+		addChild(new ScriptNode(AsteroidSpawnerScript))
 	}
 
 	/**
 	 * Create new asteroids at regular intervals.
 	 */
-	static class AsteroidSpawnerScript extends EntityScript<AsteroidSpawner> {
+	static class AsteroidSpawnerScript extends Script {
 
 		private static float minSpawnRate = 2f
 		private static float maxSpawnRate = 1f
@@ -70,7 +71,7 @@ class AsteroidSpawner extends Entity<AsteroidSpawner> {
 			// the visible area.  This asteroid is then rotated towards the center
 			// with a little variance so that it flies back towards the play area.
 			if (spawnTimer >= spawnRate) {
-				var scene = entity.scene
+				var scene = node.scene as AsteroidsScene
 				var spawnAngle = Math.random() * 2 * Math.PI
 				spawnPoint.set(-Math.sin(spawnAngle) as float, Math.cos(spawnAngle) as float).mul(scene.WIDTH / 1.8f as float)
 				headingCenter.set(spawnPoint).mul(-1f)

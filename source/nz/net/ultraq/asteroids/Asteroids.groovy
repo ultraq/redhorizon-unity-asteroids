@@ -19,9 +19,7 @@ package nz.net.ultraq.asteroids
 import nz.net.ultraq.asteroids.debug.DebugCollisionOutlineSystem
 import nz.net.ultraq.asteroids.debug.DebugEverythingBinding
 import nz.net.ultraq.redhorizon.engine.Engine
-import nz.net.ultraq.redhorizon.engine.Entity
 import nz.net.ultraq.redhorizon.engine.graphics.GraphicsSystem
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.LogPanel
 import nz.net.ultraq.redhorizon.engine.graphics.imgui.NodeList
 import nz.net.ultraq.redhorizon.engine.input.InputSystem
@@ -39,6 +37,7 @@ import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLFramebuffer
 import nz.net.ultraq.redhorizon.graphics.opengl.OpenGLWindow
 import nz.net.ultraq.redhorizon.input.InputEventHandler
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import static nz.net.ultraq.asteroids.ScopedValues.*
 
 import org.lwjgl.system.Configuration
@@ -92,24 +91,24 @@ class Asteroids implements Runnable {
 
 					// Init scene and systems
 					scene = new AsteroidsScene().tap {
-						var debugOverlayComponent = new ImGuiComponent(new DebugOverlay()
+						var debugOverlay = new DebugOverlay()
 							.withCursorTracking(this.window, camera)
-							.withProfilingLogging())
+							.withProfilingLogging()
 							.disable()
-						var nodeListComponent = new ImGuiComponent(new NodeList(it))
+						var nodeListComponent = new NodeList(it)
 							.disable()
-						var logPanelComponent = new ImGuiComponent(new LogPanel())
+						var logPanelComponent = new LogPanel()
 							.disable()
-						addChild(new Entity()
-							.addComponent(debugOverlayComponent)
-							.addComponent(nodeListComponent)
-							.addComponent(logPanelComponent)
+						addChild(new Node()
+							.addChild(debugOverlay)
+							.addChild(nodeListComponent)
+							.addChild(logPanelComponent)
 							.withName('Debug UI'))
 
 						var debugEverythingBinding = new DebugEverythingBinding(it,
-							[debugOverlayComponent, nodeListComponent, logPanelComponent])
+							[debugOverlay, nodeListComponent, logPanelComponent])
 						inputEventHandler
-							.addImGuiOverlayBinding([debugOverlayComponent])
+							.addImGuiOverlayBinding([debugOverlay])
 							.addInputBinding(debugEverythingBinding)
 					}
 					var engine = new Engine()

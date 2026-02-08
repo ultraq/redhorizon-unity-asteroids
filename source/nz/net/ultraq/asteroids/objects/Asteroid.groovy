@@ -16,14 +16,14 @@
 
 package nz.net.ultraq.asteroids.objects
 
+import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollider
+import nz.net.ultraq.redhorizon.engine.physics.CollisionEvent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.graphics.Sprite
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.FrustumIntersection
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
+class Asteroid extends Node<Asteroid> implements EventTarget<Asteroid> {
 
 	static final float baseSpeed = 100f
 	static int count = 1
@@ -69,16 +69,16 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 
 		var resourceManager = RESOURCE_MANAGER.get()
 		var asteroidImage = resourceManager.loadImage("Asteroid_0${(Math.random() * 3 + 1) as int}.png")
-		addComponent(new SpriteComponent(asteroidImage, BasicShader)
+		addChild(new Sprite(asteroidImage)
 			.rotate(0f, 0f, Math.random() * 2 * Math.PI as float))
-		addComponent(new CircleCollisionComponent(asteroidImage.width / 2))
-		addComponent(new ScriptComponent(AsteroidScript))
+		addChild(new CircleCollider(asteroidImage.width / 2))
+		addChild(new ScriptNode(AsteroidScript))
 	}
 
 	/**
 	 * Asteroid movement and behaviour.
 	 */
-	static class AsteroidScript extends EntityScript<Asteroid> {
+	static class AsteroidScript extends Script<Asteroid> {
 
 		private FrustumIntersection frustumIntersection = new FrustumIntersection()
 		private boolean visible = false
@@ -90,39 +90,38 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 		@Override
 		void init() {
 
-			var camera = entity.scene.findDescendent { it instanceof CameraEntity } as CameraEntity
-			frustumIntersection.set(camera.viewProjection.scale(0.8f, new Matrix4f()), false)
-		}
+			var scene = node.scene as AsteroidsScene
 
-		@Override
-		void onCollision(Object asteroidBounds, Entity otherEntity, Object otherBounds) {
+			frustumIntersection.set(scene.camera.viewProjection.scale(0.8f, new Matrix4f()), false)
 
-			if (otherEntity instanceof Bullet) {
-				var scene = entity.scene
+			node.findDescendentByType(CircleCollider).on(CollisionEvent) { event ->
+				var otherObject = event.otherObject()
 
-				if (entity.size == Size.LARGE || entity.size == Size.MEDIUM) {
-					logger.debug('{} collided with bullet - splitting', entity.name)
-					scene.queueUpdate { ->
-						var newSize = entity.size == Size.LARGE ? Size.MEDIUM : Size.SMALL
-						scene.addChild(
-							new Asteroid(newSize, splitPosition1.set(entity.position).add(-4f, 0f),
-								entity.getRotation().add(0f, 0f, Math.toRadians(Math.random() * 90) as float, splitRotation1).z)
-								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
-						scene.addChild(
-							new Asteroid(newSize, splitPosition2.set(entity.position).add(4f, 0f),
-								entity.getRotation().add(0f, 0f, Math.toRadians(Math.random() * -90) as float, splitRotation2).z)
-								.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
+				if (otherObject instanceof Bullet) {
+					if (node.size == Size.LARGE || node.size == Size.MEDIUM) {
+						logger.debug('{} collided with bullet - splitting', node.name)
+						scene.queueUpdate { ->
+							var newSize = node.size == Size.LARGE ? Size.MEDIUM : Size.SMALL
+							scene.addChild(
+								new Asteroid(newSize, splitPosition1.set(node.position).add(-4f, 0f),
+									node.getRotation().add(0f, 0f, Math.toRadians(Math.random() * 90) as float, splitRotation1).z)
+									.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
+							scene.addChild(
+								new Asteroid(newSize, splitPosition2.set(node.position).add(4f, 0f),
+									node.getRotation().add(0f, 0f, Math.toRadians(Math.random() * -90) as float, splitRotation2).z)
+									.withName("Asteroid ${Asteroid.count++} (${newSize.name().toLowerCase()})"))
+						}
 					}
-				}
-				else {
-					logger.debug('{} collided with bullet - destroying', entity.name)
-				}
+					else {
+						logger.debug('{} collided with bullet - destroying', node.name)
+					}
 
-				scene.queueUpdate { ->
-					entity.parent.removeChild(entity)
-					entity.close()
+					scene.queueUpdate { ->
+						node.parent.removeChild(node)
+						node.close()
+					}
+					node.trigger(new AsteroidDestroyedEvent(node))
 				}
-				entity.trigger(new AsteroidDestroyedEvent(entity))
 			}
 		}
 
@@ -131,11 +130,11 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 
 			// Remove asteroids that have left the playing field
 			var lastVisible = visible
-			var nowVisible = frustumIntersection.testPoint(entity.position)
+			var nowVisible = frustumIntersection.testPoint(node.position)
 			if (lastVisible && !nowVisible) {
-				entity.scene.queueUpdate { ->
-					entity.parent.removeChild(entity)
-					entity.close()
+				node.scene.queueUpdate { ->
+					node.parent.removeChild(node)
+					node.close()
 				}
 				return
 			}
@@ -144,8 +143,8 @@ class Asteroid extends Entity<Asteroid> implements EventTarget<Asteroid> {
 			}
 
 			// Keep moving along
-			var speed = baseSpeed * (entity.size == Size.LARGE ? 1f : entity.size == Size.MEDIUM ? 3f : 12f)
-			entity.translate(0f, speed * delta as float)
+			var speed = baseSpeed * (node.size == Size.LARGE ? 1f : node.size == Size.MEDIUM ? 3f : 12f)
+			node.translate(0f, speed * delta as float)
 		}
 	}
 }

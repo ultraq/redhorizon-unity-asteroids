@@ -21,7 +21,7 @@ import nz.net.ultraq.asteroids.objects.GameOver
 import nz.net.ultraq.asteroids.objects.Lives
 import nz.net.ultraq.asteroids.objects.Player
 import nz.net.ultraq.asteroids.objects.Score
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
+import nz.net.ultraq.redhorizon.graphics.Camera
 import nz.net.ultraq.redhorizon.graphics.Window
 import nz.net.ultraq.redhorizon.scenegraph.Scene
 import static nz.net.ultraq.asteroids.ScopedValues.WINDOW
@@ -39,7 +39,7 @@ class AsteroidsScene extends Scene {
 	static final int WIDTH = 1920
 	static final int HEIGHT = 1440
 
-	final CameraEntity camera
+	final Camera camera
 	final Player player
 	boolean showCollisionLines = false
 	private final Window window
@@ -51,7 +51,7 @@ class AsteroidsScene extends Scene {
 
 		window = WINDOW.get()
 
-		camera = new CameraEntity(WIDTH, HEIGHT, window)
+		camera = new Camera(WIDTH, HEIGHT, window)
 		player = new Player()
 		addChild(camera)
 		addChild(player)

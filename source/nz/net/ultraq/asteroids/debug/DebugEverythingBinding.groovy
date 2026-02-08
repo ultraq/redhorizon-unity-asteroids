@@ -17,9 +17,9 @@
 package nz.net.ultraq.asteroids.debug
 
 import nz.net.ultraq.asteroids.AsteroidsScene
-import nz.net.ultraq.redhorizon.engine.graphics.GridLinesEntity
-import nz.net.ultraq.redhorizon.engine.graphics.imgui.ImGuiComponent
+import nz.net.ultraq.redhorizon.engine.graphics.GridLines
 import nz.net.ultraq.redhorizon.graphics.Colour
+import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
 import nz.net.ultraq.redhorizon.input.KeyBinding
 
 import org.joml.primitives.Rectanglef
@@ -42,7 +42,7 @@ class DebugEverythingBinding extends KeyBinding {
 
 	private static boolean enabled = false
 
-	DebugEverythingBinding(AsteroidsScene scene, List<ImGuiComponent> debugWindows) {
+	DebugEverythingBinding(AsteroidsScene scene, List<ImGuiModule> debugWindows) {
 
 		super(GLFW_KEY_P, true, { ->
 			enabled = !enabled
@@ -56,11 +56,11 @@ class DebugEverythingBinding extends KeyBinding {
 				}
 			}
 
-			var gridLines = scene.findDescendent { it instanceof GridLinesEntity } as GridLinesEntity
+			var gridLines = scene.findDescendentByType(GridLines)
 			if (enabled) {
 				if (!gridLines) {
 					scene.insertBefore(
-						new GridLinesEntity(new Rectanglef(0f, 0f, AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center(), 100f,
+						new GridLines(new Rectanglef(0f, 0f, AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center(), 100f,
 							LIGHT_GREY, Colour.GREY)
 							.withName('Grid lines'),
 						scene.player)

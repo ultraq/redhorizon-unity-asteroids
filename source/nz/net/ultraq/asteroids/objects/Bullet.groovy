@@ -16,12 +16,12 @@
 
 package nz.net.ultraq.asteroids.objects
 
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollider
+import nz.net.ultraq.redhorizon.engine.physics.CollisionEvent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.graphics.Sprite
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.Matrix4fc
@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Emanuel Rabina
  */
-class Bullet extends Entity<Bullet> {
+class Bullet extends Node<Bullet> {
 
 	static final float bulletSpeed = 800f
 	static final float bulletLifetime = 1.2f
@@ -52,29 +52,33 @@ class Bullet extends Entity<Bullet> {
 
 		var resourceManager = RESOURCE_MANAGER.get()
 		var bulletImage = resourceManager.loadImage('Square.png')
-		addComponent(new SpriteComponent(bulletImage, BasicShader))
-		addComponent(new CircleCollisionComponent(bulletImage.width / 2))
-		addComponent(new ScriptComponent(BulletScript))
+		addChild(new Sprite(bulletImage))
+		addChild(new CircleCollider(bulletImage.width / 2))
+		addChild(new ScriptNode(BulletScript))
 	}
 
 	/**
 	 * Bullet behaviour script.
 	 */
-	static class BulletScript extends EntityScript<Bullet> {
+	static class BulletScript extends Script<Bullet> {
 
 		private float bulletTimer
 		private boolean queuedForRemoval = false
 
 		@Override
-		void onCollision(Object bulletBounds, Entity otherEntity, Object otherBounds) {
+		void init() {
 
-			if (otherEntity instanceof Asteroid && !queuedForRemoval) {
-				logger.debug('Bullet collided with {} - removing from scene', otherEntity.name)
-				entity.scene.queueUpdate { ->
-					entity.parent?.removeChild(entity)
-					entity.close()
+			node.findDescendentByType(CircleCollider).on(CollisionEvent) { event ->
+				var otherObject = event.otherObject()
+
+				if (otherObject instanceof Asteroid && !queuedForRemoval) {
+					logger.debug('Bullet collided with {} - removing from scene', otherObject.name)
+					node.scene.queueUpdate { ->
+						node.parent?.removeChild(node)
+						node.close()
+					}
+					queuedForRemoval = true
 				}
-				queuedForRemoval = true
 			}
 		}
 
@@ -85,16 +89,16 @@ class Bullet extends Entity<Bullet> {
 
 			// Destroy bullet if it reaches the max lifetime
 			if (bulletTimer > bulletLifetime && !queuedForRemoval) {
-				entity.scene.queueUpdate { ->
-					entity.parent?.removeChild(entity)
-					entity.close()
+				node.scene.queueUpdate { ->
+					node.parent?.removeChild(node)
+					node.close()
 				}
 				queuedForRemoval = true
 			}
 
 			// Keep moving along
 			else {
-				entity.translate(0f, (bulletSpeed + entity.initialVelocity.length()) * delta as float)
+				node.translate(0f, (bulletSpeed + node.initialVelocity.length()) * delta as float)
 			}
 		}
 	}

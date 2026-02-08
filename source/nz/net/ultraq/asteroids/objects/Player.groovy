@@ -18,14 +18,14 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.asteroids.AsteroidsScene
 import nz.net.ultraq.eventhorizon.EventTarget
-import nz.net.ultraq.redhorizon.engine.Entity
-import nz.net.ultraq.redhorizon.engine.graphics.CameraEntity
-import nz.net.ultraq.redhorizon.engine.graphics.SpriteComponent
-import nz.net.ultraq.redhorizon.engine.physics.CircleCollisionComponent
-import nz.net.ultraq.redhorizon.engine.physics.CollisionComponent
-import nz.net.ultraq.redhorizon.engine.scripts.EntityScript
-import nz.net.ultraq.redhorizon.engine.scripts.ScriptComponent
-import nz.net.ultraq.redhorizon.graphics.opengl.BasicShader
+import nz.net.ultraq.redhorizon.engine.physics.CircleCollider
+import nz.net.ultraq.redhorizon.engine.physics.Collider
+import nz.net.ultraq.redhorizon.engine.physics.CollisionEvent
+import nz.net.ultraq.redhorizon.engine.scripts.Script
+import nz.net.ultraq.redhorizon.engine.scripts.ScriptNode
+import nz.net.ultraq.redhorizon.graphics.Camera
+import nz.net.ultraq.redhorizon.graphics.Sprite
+import nz.net.ultraq.redhorizon.scenegraph.Node
 import static nz.net.ultraq.asteroids.ScopedValues.RESOURCE_MANAGER
 
 import org.joml.Vector2f
@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit
  *
  * @author Emanuel Rabina
  */
-class Player extends Entity<Player> implements EventTarget<Player> {
+class Player extends Node<Player> implements EventTarget<Player> {
 
 	static final float maxThrustSpeed = 500f
 	static final float linearDrag = 1f
@@ -58,17 +58,17 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 		var resourceManager = RESOURCE_MANAGER.get()
 		var playerImage = resourceManager.loadImage('Player.png')
-		addComponent(new SpriteComponent(playerImage, BasicShader))
-		addComponent(new CircleCollisionComponent(playerImage.width / 2))
-		addComponent(new ScriptComponent(PlayerScript))
+		addChild(new Sprite(playerImage))
+		addChild(new CircleCollider(playerImage.width / 2))
+		addChild(new ScriptNode(PlayerScript))
 	}
 
 	/**
 	 * Player movement and behaviour script.
 	 */
-	static class PlayerScript extends EntityScript<Player> {
+	static class PlayerScript extends Script<Player> {
 
-		private CameraEntity camera
+		private Camera camera
 		private Vector2f worldBoundsMin
 		private Vector2f worldBoundsMax
 
@@ -89,42 +89,42 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 		@Override
 		void init() {
 
-			camera = entity.scene.findDescendent { it instanceof CameraEntity } as CameraEntity
+			var scene = node.scene as AsteroidsScene
+
+			camera = scene.camera
 			var worldBounds = new Rectanglef().setMax(AsteroidsScene.WIDTH, AsteroidsScene.HEIGHT).center()
 			worldBoundsMin = worldBounds.getMin(new Vector2f())
 			worldBoundsMax = worldBounds.getMax(new Vector2f())
-		}
 
-		@Override
-		void onCollision(Object playerBounds, Entity otherEntity, Object otherBounds) {
+			node.findDescendentByType(CircleCollider).on(CollisionEvent) { event ->
+				var otherObject = event.otherObject()
 
-			if (otherEntity instanceof Asteroid) {
-				logger.debug('The player collided with {}!', otherEntity.name)
-				var scene = entity.scene
+				if (otherObject instanceof Asteroid) {
+					logger.debug('The player collided with {}!', otherObject.name)
+					scene.queueUpdate { ->
+						scene.removeChild(node)
+						node.resetTransform()
+						node.findDescendentByType(Collider).disable()
+						velocity.zero()
 
-				scene.queueUpdate { ->
-					scene.removeChild(entity)
-					entity.resetTransform()
-					entity.findComponentByType(CollisionComponent).disable()
-					velocity.zero()
-
-					// Respawn with lives remaining
-					var livesEntity = scene.findDescendent { it instanceof Lives } as Lives
-					if (livesEntity.lives > 1) {
-						scene.queueUpdate(3, TimeUnit.SECONDS) { ->
-							scene.addChild(entity)
+						// Respawn with lives remaining
+						var lives = scene.findDescendentByType(Lives) as Lives
+						if (lives.lives > 1) {
+							scene.queueUpdate(3, TimeUnit.SECONDS) { ->
+								scene.addChild(node)
+							}
+							scene.queueUpdate(5, TimeUnit.SECONDS) { ->
+								node.findDescendentByType(Collider).enable()
+							}
 						}
-						scene.queueUpdate(5, TimeUnit.SECONDS) { ->
-							entity.findComponentByType(CollisionComponent).enable()
+						// Game over
+						else {
+							var gameOver = scene.findDescendentByType(GameOver) as GameOver
+							gameOver.enable()
 						}
-					}
-					// Game over
-					else {
-						var gameOverEntity = scene.findDescendent { it instanceof GameOver } as GameOver
-						gameOverEntity.enable()
-					}
 
-					entity.trigger(new PlayerDestroyedEvent(entity, otherEntity))
+						node.trigger(new PlayerDestroyedEvent(node, otherObject))
+					}
 				}
 			}
 		}
@@ -145,11 +145,11 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 			// Update rotation so the sprite will appear to look at the cursor
 			var cursorPosition = input.cursorPosition()
 			if (cursorPosition) {
-				positionXY.set(entity.position)
+				positionXY.set(node.position)
 				worldCursorPosition.set(camera.unproject(cursorPosition.x(), cursorPosition.y(), unprojectResult))
 				worldCursorPosition.sub(positionXY, headingToCursor)
 				heading = headingToCursor.angle(Vector2f.UP)
-				entity.setRotation(0f, 0f, -heading)
+				node.setRotation(0f, 0f, -heading)
 			}
 		}
 
@@ -181,8 +181,8 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 
 			// Adjust position based on velocity
 			if (velocity) {
-				updatedPosition.set(entity.position).add(velocity).min(worldBoundsMax).max(worldBoundsMin)
-				entity.setPosition(updatedPosition.x(), updatedPosition.y())
+				updatedPosition.set(node.position).add(velocity).min(worldBoundsMax).max(worldBoundsMin)
+				node.setPosition(updatedPosition.x(), updatedPosition.y())
 			}
 		}
 
@@ -194,9 +194,9 @@ class Player extends Entity<Player> implements EventTarget<Player> {
 			firingCooldown -= delta
 
 			if ((input.keyPressed(GLFW_KEY_SPACE) || input.mouseButtonPressed(GLFW_MOUSE_BUTTON_1)) && firingCooldown <= 0f) {
-				var scene = entity.scene
+				var scene = node.scene
 				scene.queueUpdate { ->
-					scene.addChild(new Bullet(entity.transform, velocity)
+					scene.addChild(new Bullet(node.transform, velocity)
 						.withName("Bullet ${bulletCount++}"))
 				}
 				firingCooldown = 0.25f
