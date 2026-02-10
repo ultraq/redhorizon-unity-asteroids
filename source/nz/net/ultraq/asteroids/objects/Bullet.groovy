@@ -68,7 +68,7 @@ class Bullet extends Node<Bullet> {
 		@Override
 		void init() {
 
-			node.findDescendentByType(CircleCollider).on(CollisionEvent) { event ->
+			node.findByType(CircleCollider).on(CollisionEvent) { event ->
 				var otherObject = event.otherObject()
 
 				if (otherObject instanceof Asteroid && !queuedForRemoval) {

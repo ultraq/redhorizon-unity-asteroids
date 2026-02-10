@@ -51,7 +51,7 @@ class Lives extends Node<Lives> {
 	Lives(ImFont squareFont) {
 
 		addChild(new ScriptNode(LivesScript))
-		addChild(new LivesUiComponent(squareFont))
+		addChild(new LivesUI(squareFont))
 	}
 
 	/**
@@ -86,12 +86,12 @@ class Lives extends Node<Lives> {
 	/**
 	 * Component for rendering the number of lives remaining to the UI.
 	 */
-	class LivesUiComponent extends ImGuiModule {
+	class LivesUI extends ImGuiModule {
 
 		private final ImFont squareFont
 		private final Image livesImage
 
-		LivesUiComponent(ImFont squareFont) {
+		LivesUI(ImFont squareFont) {
 
 			this.squareFont = squareFont
 			var resourceManager = RESOURCE_MANAGER.get()

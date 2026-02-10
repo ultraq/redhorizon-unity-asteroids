@@ -44,12 +44,12 @@ class DebugCollisionOutlineSystem extends System {
 
 		average('Update', 1f, logger) { ->
 			scene.traverse(CircleCollider) { CircleCollider collider ->
-				var collisionOutline = collider.parent.findDescendent { it.name == COLLISION_OUTLINE_NAME } as Shape
+				var collisionOutline = collider.parent.findByName(COLLISION_OUTLINE_NAME)
 				if (((AsteroidsScene)scene).showCollisionLines) {
 					if (collider) {
 						if (!collisionOutline) {
 							var radius = collider.radius
-							collisionOutline = collider.addAndReturnChild(
+							collisionOutline = collider.parent.addAndReturnChild(
 								new Shape(Type.LINE_LOOP, new Vertex[]{
 									new Vertex(new Vector3f(-radius as float, -radius as float, 0), Colour.YELLOW),
 									new Vertex(new Vector3f(radius as float, -radius as float, 0), Colour.YELLOW),

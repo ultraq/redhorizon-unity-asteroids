@@ -96,7 +96,7 @@ class Player extends Node<Player> implements EventTarget<Player> {
 			worldBoundsMin = worldBounds.getMin(new Vector2f())
 			worldBoundsMax = worldBounds.getMax(new Vector2f())
 
-			node.findDescendentByType(CircleCollider).on(CollisionEvent) { event ->
+			node.findByType(CircleCollider).on(CollisionEvent) { event ->
 				var otherObject = event.otherObject()
 
 				if (otherObject instanceof Asteroid) {
@@ -104,22 +104,22 @@ class Player extends Node<Player> implements EventTarget<Player> {
 					scene.queueUpdate { ->
 						scene.removeChild(node)
 						node.resetTransform()
-						node.findDescendentByType(Collider).disable()
+						node.findByType(Collider).disable()
 						velocity.zero()
 
 						// Respawn with lives remaining
-						var lives = scene.findDescendentByType(Lives) as Lives
+						var lives = scene.findByType(Lives)
 						if (lives.lives > 1) {
 							scene.queueUpdate(3, TimeUnit.SECONDS) { ->
 								scene.addChild(node)
 							}
 							scene.queueUpdate(5, TimeUnit.SECONDS) { ->
-								node.findDescendentByType(Collider).enable()
+								node.findByType(Collider).enable()
 							}
 						}
 						// Game over
 						else {
-							var gameOver = scene.findDescendentByType(GameOver) as GameOver
+							var gameOver = scene.findByType(GameOver)
 							gameOver.enable()
 						}
 

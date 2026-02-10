@@ -56,7 +56,7 @@ class DebugEverythingBinding extends KeyBinding {
 				}
 			}
 
-			var gridLines = scene.findDescendentByType(GridLines)
+			var gridLines = scene.findByType(GridLines)
 			if (enabled) {
 				if (!gridLines) {
 					scene.insertBefore(

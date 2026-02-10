@@ -18,7 +18,6 @@ package nz.net.ultraq.asteroids.objects
 
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiContext
 import nz.net.ultraq.redhorizon.graphics.imgui.ImGuiModule
-import nz.net.ultraq.redhorizon.scenegraph.Node
 
 import imgui.ImFont
 import imgui.ImGui
@@ -31,48 +30,40 @@ import static imgui.flag.ImGuiWindowFlags.*
  *
  * @author Emanuel Rabina
  */
-class GameOver extends Node<GameOver> {
+class GameOver extends ImGuiModule<GameOver> {
+
+	private final ImFont squareFont
+	private final ImFont squareOutlineFont
 
 	/**
 	 * Constructor, adds a UI component that will be shown when it's game over.
 	 */
 	GameOver(ImFont squareFont, ImFont squareOutlineFont) {
 
-		addChild(new GameOverUiComponent(squareFont, squareOutlineFont))
+		this.squareFont = squareFont
+		this.squareOutlineFont = squareOutlineFont
 	}
 
-	static class GameOverUiComponent extends ImGuiModule {
+	@Override
+	void render(ImGuiContext context) {
 
-		private final ImFont squareFont
-		private final ImFont squareOutlineFont
+		var uiArea = context.uiArea
+		ImGui.setNextWindowBgAlpha(0.4f)
+		ImGui.setNextWindowPos(
+			uiArea.minX + (uiArea.lengthX() / 2) - (130 * context.uiScale) as float,
+			uiArea.minY + (uiArea.lengthY() / 2) - (100 * context.uiScale) as float)
+		ImGui.pushStyleVar(WindowBorderSize, 0f)
 
-		GameOverUiComponent(ImFont squareFont, ImFont squareOutlineFont) {
+		ImGui.begin('Game Over', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
+		ImGui.pushFont(squareOutlineFont)
+		ImGui.text('Game Over')
+		ImGui.popFont()
+		ImGui.pushFont(squareFont)
+		ImGui.setCursorPosX(62 * context.uiScale as float)
+		ImGui.text('Press ESC to exit')
+		ImGui.popFont()
+		ImGui.end()
 
-			this.squareFont = squareFont
-			this.squareOutlineFont = squareOutlineFont
-		}
-
-		@Override
-		void render(ImGuiContext context) {
-
-			var uiArea = context.uiArea
-			ImGui.setNextWindowBgAlpha(0.4f)
-			ImGui.setNextWindowPos(
-				uiArea.minX + (uiArea.lengthX() / 2) - (130 * context.uiScale) as float,
-				uiArea.minY + (uiArea.lengthY() / 2) - (100 * context.uiScale) as float)
-			ImGui.pushStyleVar(WindowBorderSize, 0f)
-
-			ImGui.begin('Game Over', new ImBoolean(true), NoNav | NoDecoration | NoSavedSettings | NoFocusOnAppearing | NoDocking | AlwaysAutoResize)
-			ImGui.pushFont(squareOutlineFont)
-			ImGui.text('Game Over')
-			ImGui.popFont()
-			ImGui.pushFont(squareFont)
-			ImGui.setCursorPosX(62 * context.uiScale as float)
-			ImGui.text('Press ESC to exit')
-			ImGui.popFont()
-			ImGui.end()
-
-			ImGui.popStyleVar()
-		}
+		ImGui.popStyleVar()
 	}
 }

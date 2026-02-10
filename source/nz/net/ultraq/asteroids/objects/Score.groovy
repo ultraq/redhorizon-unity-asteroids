@@ -50,7 +50,7 @@ class Score extends Node<Score> {
 	Score(ImFont squareFont) {
 
 		addChild(new ScriptNode(ScoreScript))
-		addChild(new ScoreUiComponent(squareFont))
+		addChild(new ScoreUI(squareFont))
 	}
 
 	/**
@@ -85,11 +85,11 @@ class Score extends Node<Score> {
 	/**
 	 * UI component for displaying the player's score.
 	 */
-	class ScoreUiComponent extends ImGuiModule {
+	class ScoreUI extends ImGuiModule {
 
 		private final ImFont squareFont
 
-		ScoreUiComponent(ImFont squareFont) {
+		ScoreUI(ImFont squareFont) {
 
 			this.squareFont = squareFont
 		}
