@@ -69,7 +69,7 @@ class Bullet extends Node<Bullet> {
 		void init() {
 
 			node.findByType(CircleCollider).on(CollisionEvent) { event ->
-				var otherObject = event.otherObject()
+				var otherObject = event.otherObject().parent
 
 				if (otherObject instanceof Asteroid && !queuedForRemoval) {
 					logger.debug('Bullet collided with {} - removing from scene', otherObject.name)

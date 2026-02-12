@@ -97,7 +97,7 @@ class Player extends Node<Player> implements EventTarget<Player> {
 			worldBoundsMax = worldBounds.getMax(new Vector2f())
 
 			node.findByType(CircleCollider).on(CollisionEvent) { event ->
-				var otherObject = event.otherObject()
+				var otherObject = event.otherObject().parent
 
 				if (otherObject instanceof Asteroid) {
 					logger.debug('The player collided with {}!', otherObject.name)

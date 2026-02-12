@@ -95,7 +95,7 @@ class Asteroid extends Node<Asteroid> implements EventTarget<Asteroid> {
 			frustumIntersection.set(scene.camera.viewProjection.scale(0.8f, new Matrix4f()), false)
 
 			node.findByType(CircleCollider).on(CollisionEvent) { event ->
-				var otherObject = event.otherObject()
+				var otherObject = event.otherObject().parent
 
 				if (otherObject instanceof Bullet) {
 					if (node.size == Size.LARGE || node.size == Size.MEDIUM) {
