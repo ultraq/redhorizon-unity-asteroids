@@ -49,7 +49,7 @@ import picocli.CommandLine.Command
  *
  * @author Emanuel Rabina
  */
-@Command(name = 'assets')
+@Command(name = 'asteroids')
 class Asteroids implements Runnable {
 
 	static {
